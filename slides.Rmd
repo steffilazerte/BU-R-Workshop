@@ -1,0 +1,149 @@
+---
+title: "Slides and Data"
+---
+
+This workshop consists of 5 modules (with an optional basic stats module).
+I have activities in most modules and mini-assignments in many. 
+
+Slides will be posted prior to the workshop and answer slides will be available after the workshop.
+
+## Slides
+
+```{r, include = FALSE}
+library(tidyverse)
+library(glue)
+library(magrittr)
+
+post <- "2022-01-26"
+after_date <- "2022-01-30"
+
+post <- Sys.Date() >= as.Date(post)
+after_date <- Sys.Date() > as.Date(after_date)
+
+w <- "BU R Workshop"
+```
+
+
+```{r getslides, include = FALSE}
+dir <- "~/Projects/Teaching/R Workshop/Lessons"
+
+# Get video
+f <- "videos"
+if(dir.exists(dirname(f)) && !dir.exists(f)) dir.create(f)
+file.copy(file.path(dir, "../Videos", "R Workshop - Statistics.mp4"),
+          "videos/", overwrite = TRUE)
+
+# Get data
+f <- "data"
+if(dir.exists(dirname(f)) && !dir.exists(f)) dir.create(f)
+list.files(path = file.path(dir, "data", "Upload"), full.names = TRUE) %>%
+  file.copy(f, overwrite = TRUE)
+
+# Set Slides
+labs <- tribble(
+  ~f,                                   ~nice,                                ~answers,
+  "1_intro_to_R.Rmd",                   "1 Introduction to R",                 TRUE,
+  "2_visualizations.Rmd",               "2 Visualizing Data",                  TRUE,      
+  "3_loading and cleaning.Rmd",         "3 Loading and Cleaning Data",         TRUE,
+  "4_summarizing_and_transforming.Rmd", "4 Summarizing and Transforming Data", TRUE,
+  "5_statistics.Rmd",                   "5 Basic Statistics",                  FALSE,
+  "6_getting_help.Rmd",                 "6 Getting Help",                      TRUE) %>%
+  mutate(f = file.path(dir, f),
+         nice = glue("{w} - {nice}"))
+
+# Get slides
+if(post) {
+  f <- "slides"
+  if(!dir.exists(f)) dir.create(f)
+  file.copy(from = c(file.path(dir, "pres_styles.css"), 
+                     file.path(dir, "global_styles.css"),
+                     file.path(dir, "macros.js"),
+                     file.path(dir, "figures")), 
+            to = f, recursive = TRUE)
+  
+  # MOVE BEFORE PDF
+  before <- list.files(path = file.path(dir, "Handouts"), full.names = TRUE) %>%
+    str_subset("answers", negate = TRUE) %>%
+    str_subset(glue_collapse(labs$nice, "|")) %T>%
+    file.copy(f, overwrite = TRUE)
+  
+  # MOVE BEFORE HTML
+  if(length(before) > 0) {
+    list.files(path = dir, full.names = TRUE,
+               pattern = paste0(str_remove_all(basename(before), ".pdf"),
+                                collapse = "|")) %>%
+      str_subset("pdf|answers", negate = TRUE) %>%
+      file.copy(f, overwrite = TRUE, recursive = TRUE)
+  }
+  
+  # MOVE AFTER PDF/HTML
+  if(after_date){
+    
+    # PDF
+    after <- list.files(path = file.path(dir, "Handouts"), full.names = TRUE) %>%
+      str_subset("answers") %T>%
+      file.copy(f, overwrite = TRUE)
+    
+    
+    # HTML
+    if(length(after) > 0) {
+      basename(after) %>% 
+        str_remove_all(".pdf") %>%
+        glue_collapse(sep = "|") %>%
+        list.files(path = dir,  full.names = TRUE, pattern = .) %>%
+        str_subset("pdf", negate = TRUE) %>%
+        file.copy(f, overwrite = TRUE, recursive = TRUE)
+    }
+  }
+}
+```
+
+```{r preptext, include = FALSE}
+slides <- tibble(file = list.files("./slides", full.names = TRUE),
+                 name = basename(file)) %>%
+  filter(!str_detect(file, "_files|.css|.js|figures")) %>%
+  mutate(name = str_remove_all(name, ".html|.pdf| - answers"),
+         type = str_extract(file, "pdf|html"),
+         answers = if_else(str_detect(file, "answers"), "answers", "normal")) %>%
+  arrange(file)
+
+text <- slides %>%
+  complete(type = c("html", "pdf"), answers = c("normal", "answers"), 
+           nesting(name = labs$nice)) %>%
+  mutate(file = replace_na(file, ""),
+         title = glue("**{str_replace(name, '^([0-9]{1})', '\\\\1.')}**"),
+         answers = if_else(answers == "normal", "", " - answers"),
+         type = glue("{type}{answers}"),
+         nolinks = case_when(file != "" ~ glue("({type})"),
+                             TRUE ~ glue("({type})")),
+         links = case_when(file != "" ~ glue("([{type}]({file}))"),
+                           TRUE ~ glue("({type})"))) %>%
+  arrange(name, type) %>%
+  group_by(name) %>%
+  summarize(links = glue_collapse(links, sep = "|"),
+            nolinks = glue_collapse(nolinks, sep = "|"),
+            title_nolinks = glue("{title[1]}{nolinks}"),
+            title = glue("{title[1]} {links}"), .groups = "drop") %>%
+  arrange(title) %>%
+  mutate(title = case_when(
+    !str_detect(name, "Basic Statistics") ~ title,
+    links != nolinks ~ glue("{title}|([video module](./videos/R Workshop - Statistics.mp4)) [*Not covered in Workshop*]"),
+    links == nolinks ~ glue("{title}|(video module) [*Not covered in Workshop*]")))
+```
+
+
+```{r, echo = FALSE, message = FALSE, results = "asis"}
+for(n in seq_along(text$title)) cat(text$title[n], "\n\n", sep = "")
+```
+
+## Data
+
+```{r, echo = FALSE, message = FALSE, results = "asis"}
+n <- list.files("data", full.names = TRUE)
+cat(paste0("- [", basename(n), "](",n, ")\n"))
+```
+
+```{r, eval = post, results = "asis", echo = FALSE}
+cat("## Feedback\n\n")
+cat("Please fill out the [anonymous Google Form](https://forms.gle/wLjLEh4a2vphXWKs7) and let me know how it went! (Submissions accepted until Feb 4th)")
+```
