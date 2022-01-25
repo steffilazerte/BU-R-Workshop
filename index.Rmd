@@ -68,7 +68,7 @@ We are going to be covering a lot in our R sessions, so to give us a jump start,
 
 # Instructions
 
-## 1. Run through 1+ RStudio R primers
+## 1. RStudio R primers
 
 Please complete the [RStudio Programming Basics Primer](https://rstudio.cloud/learn/primers/1.2). 
 You can complete it online and it'll give you a quick introduction to R coding which 
@@ -138,7 +138,7 @@ R.version %>%
 
 The important line is the first one: `r glue("{R.version.string} -- {R.Version()$nickname}")`
 
-## 4a) Install `tidyverse` package {#tidyverse}
+## 4a) Install `tidyverse` {#tidyverse}
 
 Packages are extensions or add-ons for R. You will use many different ones over the course of your work with R. `tidyverse` is name of a collection of newer packages for data management.
 
