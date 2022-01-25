@@ -25,7 +25,6 @@ This workshop has passed but this site will remain active for 1 year to give par
 
 ---
 
-# Pre-Workshop Preparation
 
 Welcome! I'm excited for the opportunity to share my love of R with you during this upcoming workshop. This site should give you all the details you need to get you ready to start on Saturday!
 
@@ -33,11 +32,8 @@ Welcome! I'm excited for the opportunity to share my love of R with you during t
 
 **Dates**: January 29th to 30th 2022 (Saturday and Sunday)    
 **Time**: 9am - 5pm (Central)    
-**Location**: Zoom (Meeting ID: 910 1243 3874; Passcode: 813409)
+**Location**: Zoom (Meeting ID: 910 1243 3874; Passcode: 813409)  
 **Zoom link**: <https://zoom.us/j/91012433874?pwd=UytmQXhEbThOMVVXM0lERllEaXJNQT09>
-
-
-
 
 **Instructor**: Steffi LaZerte (<sel@steffilazerte.ca>)  
 **Slides and Data:** Slides and data for the workshop are available [here](slides.html) 
@@ -166,7 +162,7 @@ The downloaded source packages are in
 library("tidyverse")
 ```
 
-> ## Problems?
+> ### Problems?
 > - If you already had R/RStudio installed, try removing them both and installing everything from scratch
 > - If you get an error about a problem installing a specific package, try installing that package invidiually (search for it in the install packages menu)
 > - Try installing the packages we need by hand: `dplyr`, `tidyr`, `readr`, `ggplot2`, `skimr`
