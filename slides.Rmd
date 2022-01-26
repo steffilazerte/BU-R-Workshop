@@ -19,13 +19,11 @@ after_date <- "2022-01-30"
 
 post <- Sys.Date() >= as.Date(post)
 after_date <- Sys.Date() > as.Date(after_date)
-
-w <- "BU R Workshop"
 ```
 
 
 ```{r getslides, include = FALSE}
-dir <- "~/Projects/Teaching/R Workshop/Lessons"
+dir <- "~/Projects/R Workshop/Lessons"
 
 # Get video
 f <- "videos"
@@ -46,10 +44,9 @@ labs <- tribble(
   "2_visualizations.Rmd",               "2 Visualizing Data",                  TRUE,      
   "3_loading and cleaning.Rmd",         "3 Loading and Cleaning Data",         TRUE,
   "4_summarizing_and_transforming.Rmd", "4 Summarizing and Transforming Data", TRUE,
-  "5_statistics.Rmd",                   "5 Basic Statistics",                  FALSE,
-  "6_getting_help.Rmd",                 "6 Getting Help",                      TRUE) %>%
-  mutate(f = file.path(dir, f),
-         nice = glue("{w} - {nice}"))
+  "5_getting_help.Rmd",                 "5 Getting Help",                      TRUE,
+  "6_statistics.Rmd",                   "6 Basic Statistics",                  FALSE) %>%
+  mutate(f = file.path(dir, f))
 
 # Get slides
 if(post) {
@@ -62,7 +59,7 @@ if(post) {
             to = f, recursive = TRUE)
   
   # MOVE BEFORE PDF
-  before <- list.files(path = file.path(dir, "Handouts"), full.names = TRUE) %>%
+  before <- list.files(path = file.path(dir, "pdf"), full.names = TRUE) %>%
     str_subset("answers", negate = TRUE) %>%
     str_subset(glue_collapse(labs$nice, "|")) %T>%
     file.copy(f, overwrite = TRUE)
@@ -135,6 +132,8 @@ text <- slides %>%
 ```{r, echo = FALSE, message = FALSE, results = "asis"}
 for(n in seq_along(text$title)) cat(text$title[n], "\n\n", sep = "")
 ```
+
+Also see [R statistical notes](https://steffilazerte.ca/NRI_7350/slides.html) for U of M NRI 7350
 
 ## Data
 

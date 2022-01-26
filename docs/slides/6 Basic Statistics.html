@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Statistics in R</title>
+    <meta charset="utf-8" />
+    <script src="6 Basic Statistics_files/header-attrs-2.11/header-attrs.js"></script>
+    <script src="6 Basic Statistics_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="6 Basic Statistics_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="pres_styles.css" type="text/css" />
+    <link rel="stylesheet" href="global_styles.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: title-slide, nobar
+
+
+
+.spacer[ ]
+
+
+
+![:img right: 25px, bottom: 5px, 50%, , ](figures/stats_fig.png)
+
+## Workshop: Dealing with Data in R
+# Statistics in R
+## Now that your data are ready
+
+
+.footnote[Steffi LaZerte &lt;https://steffilazerte.ca&gt; | *Compiled: 2022-01-26*]
+
+---
+class: section
+# Basic Statistics
+
+---
+# Looking at your data
+
+
+```r
+library(skimr)
+skim(mtcars)
+```
+.small[
+
+```
+## ── Data Summary ────────────────────────
+##                            Values
+## Name                       mtcars
+## Number of rows             32    
+## Number of columns          11    
+## _______________________          
+## Column type frequency:           
+##   numeric                  11    
+## ________________________         
+## Group variables            None  
+## 
+## ── Variable type: numeric ────────────────────────────────────────────────────────────────────────────────────
+##    skim_variable n_missing complete_rate    mean      sd    p0    p25    p50    p75   p100 hist 
+##  1 mpg                   0             1  20.1     6.03  10.4   15.4   19.2   22.8   33.9  ▃▇▅▁▂
+##  2 cyl                   0             1   6.19    1.79   4      4      6      8      8    ▆▁▃▁▇
+##  3 disp                  0             1 231.    124.    71.1  121.   196.   326    472    ▇▃▃▃▂
+##  4 hp                    0             1 147.     68.6   52     96.5  123    180    335    ▇▇▆▃▁
+##  5 drat                  0             1   3.60    0.535  2.76   3.08   3.70   3.92   4.93 ▇▃▇▅▁
+##  6 wt                    0             1   3.22    0.978  1.51   2.58   3.32   3.61   5.42 ▃▃▇▁▂
+##  7 qsec                  0             1  17.8     1.79  14.5   16.9   17.7   18.9   22.9  ▃▇▇▂▁
+##  8 vs                    0             1   0.438   0.504  0      0      0      1      1    ▇▁▁▁▆
+##  9 am                    0             1   0.406   0.499  0      0      0      1      1    ▇▁▁▁▆
+## 10 gear                  0             1   3.69    0.738  3      3      4      4      5    ▇▁▆▁▂
+## 11 carb                  0             1   2.81    1.62   1      2      2      4      8    ▇▂▅▁▁
+```
+]
+
+
+
+---
+# Looking at your data
+
+
+```r
+library(GGally)
+ggpairs(dplyr::select(mtcars, mpg, cyl, hp, wt, am))
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+# T-Tests
+
+### Comparing two samples
+
+
+```r
+t.test(values ~ group, data = data)
+```
+
+- `values` are measurements from the two populations
+- `group` is the column that differentiates the two groups
+
+### **OR**
+
+
+```r
+t.test(sample1, sample2)
+```
+
+- `sample1` and `sample2` are the two samples to be compared
+
+
+---
+# T-Tests
+
+### Miles-per-gallon significantly different between Automatic and Manual cars?
+
+
+```r
+ggplot(mtcars, aes(x = factor(am), y = mpg)) + 
+  geom_boxplot()
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-8-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 88%, 75%, 20%](&lt;code&gt;?mtcars&lt;/code&gt; shows&lt;br&gt;0 = automatic&lt;br&gt;1 = manual)
+
+---
+# T-Tests
+
+### Miles-per-gallon significantly different between Automatic and Manual cars?
+
+
+```r
+t.test(mpg ~ am, data = mtcars)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  mpg by am
+## t = -3.7671, df = 18.332, p-value = 0.001374
+## alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+## 95 percent confidence interval:
+##  -11.280194  -3.209684
+## sample estimates:
+## mean in group 0 mean in group 1 
+##        17.14737        24.39231
+```
+
+![:box 30%, 75%, 40%](P = 0.00137, so yes!&lt;br&gt;Manual cars (1&amp;rpar; get more miles per gallon than Automatic cars (0&amp;rpar;)
+
+---
+# Other tests
+
+- Fisher's Exact Test - `fisher.test()`
+- Chi-Square Test - `chisq.test()`
+
+&gt; Here it's mostly about getting your data into a matrix  
+
+---
+class: split-50
+# Getting data into matrix for Chi-Square
+
+.columnl[
+Example Data
+.small[
+
+```r
+my_data &lt;- data.frame(expected = c(10, 10),
+                      observed = c(16, 4),
+                      site = c("A", "B"))
+my_data
+```
+
+```
+##   expected observed site
+## 1       10       16    A
+## 2       10        4    B
+```
+]
+
+As a matrix (only expected and observed)
+.small[
+
+```r
+my_matrix &lt;- dplyr::select(my_data, expected, observed)
+my_matrix &lt;- as.matrix(my_matrix)
+my_matrix
+```
+
+```
+##      expected observed
+## [1,]       10       16
+## [2,]       10        4
+```
+]
+]
+
+--
+
+.columnr[
+Chi-Square Test
+
+
+```r
+chisq.test(my_matrix)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test with Yates' continuity correction
+## 
+## data:  my_matrix
+## X-squared = 2.7473, df = 1, p-value = 0.09742
+```
+]
+
+
+
+
+---
+class: section
+
+# Non-parametric Statistics
+
+---
+# Non-parametric Statistics
+
+## Wilcoxon Rank Sum (Mann-Whitney) Test
+
+
+```r
+air &lt;- filter(airquality, Month %in% c(5, 8))
+```
+
+![:spacer 15px]()
+
+Is there a difference in air quality between May (5th month) and August (8th month)?
+
+```r
+wilcox.test(Ozone ~ Month, data = air, exact = FALSE)
+```
+
+```
+## 
+## 	Wilcoxon rank sum test with continuity correction
+## 
+## data:  Ozone by Month
+## W = 127.5, p-value = 0.0001208
+## alternative hypothesis: true location shift is not equal to 0
+```
+
+![:spacer 15px]()
+
+Yes!
+
+---
+# Non-parametric Statistics
+
+## Kruskal-Wallis Rank Sum Test
+
+Is there a difference in air quality among months?
+
+
+```r
+kruskal.test(Ozone ~ Month, data = airquality)
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  Ozone by Month
+## Kruskal-Wallis chi-squared = 29.267, df = 4, p-value = 6.901e-06
+```
+
+![:spacer 15px]()
+
+Yes, there is at least one month that is different from the rest.
+
+---
+class: section
+# Linear Models
+
+---
+# Linear Models
+
+#### Running models in R
+
+```r
+lm(y ~ x1 + x2, data = data)
+```
+
+- `y` is **dependent** variable
+- `x1` and `x2` are **independent** variables
+
+--
+
+#### Different types of models
+
+- If both `x`'s are continuous, this is a **linear regression**
+- If both `x`'s are categorical, this is an **ANOVA**
+- If `x1` is continuous and `x2` is categorical, this is an **ANCOVA**
+--
+
+![:box 50%, 85%, 30%](R will figure it out for you)
+
+---
+# Linear Models: Interactions
+
+**Main effects only**
+
+```r
+m &lt;- lm(y ~ x1 + x2, data = data)
+```
+
+--
+
+**Main effects** and **interaction**
+
+```r
+m &lt;- lm(y ~ x1 + x2 + x1:x2, data = data)
+```
+
+--
+
+**Main effects** and **interaction**
+
+```r
+m &lt;- lm(y ~ x1 * x2, data = data)
+```
+
+--
+
+&gt; `x1 * x2` equivalent to `x1 + x2 + x1:x2`
+
+---
+layout: true
+# Linear Regression
+
+#### Example with `msleep`
+
+```r
+lm(sleep_cycle ~ bodywt, data = msleep)
+```
+
+```
+## 
+## Call:
+## lm(formula = sleep_cycle ~ bodywt, data = msleep)
+## 
+## Coefficients:
+## (Intercept)       bodywt  
+##     0.38549      0.00107
+```
+
+---
+
+---
+
+![:label 80%, 55%, 30%](Intercept)
+
+---
+![:label 68%, 55%, 30%](Slope)
+
+---
+
+Hmm, not a lot of detail
+
+---
+layout: false
+# Linear Regression
+
+#### Assign model to `m`
+
+```r
+m &lt;- lm(sleep_cycle ~ bodywt, data = msleep)
+```
+
+`m` is a model object
+
+```r
+class(m)
+```
+
+```
+## [1] "lm"
+```
+
+This contains all the information about the model
+
+
+---
+# Linear Regression
+
+.small[
+
+```r
+summary(m)
+```
+
+```
+## 
+## Call:
+## lm(formula = sleep_cycle ~ bodywt, data = msleep)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.36081 -0.20228 -0.08506  0.03564  1.04817 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.3854937  0.0623726   6.180 8.43e-07 ***
+## bodywt      0.0010700  0.0004248   2.519   0.0173 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3313 on 30 degrees of freedom
+##   (51 observations deleted due to missingness)
+## Multiple R-squared:  0.1746,	Adjusted R-squared:  0.147 
+## F-statistic: 6.344 on 1 and 30 DF,  p-value: 0.01734
+```
+]
+--
+
+![:box 50%, 50%, 40%](&lt;strong&gt;Wait!&lt;/strong&gt;&lt;br&gt;Shouldn't interpret until we know the model is solid)
+
+
+---
+# Model Diagnostics
+
+## Model Assumptions
+
+- Normality (of residuals)
+- Constant Variance (no heteroscedasticity)
+
+## Other cautions
+
+- Influential variables (Cook's D)
+- Multiple collinearity (with more than one `x` or explanatory variables)
+
+---
+# Model Diagnostics
+
+## Diagnostics by Hand
+
+- Depending on model, different diagnostic functions (e.g., `plot()`)
+- But you can check any model by hand if you pull out the right data
+
+![:spacer 5px]()
+
+First let's get our relevant variables, `residuals` and `fitted values`:
+
+
+```r
+d &lt;- data.frame(residuals = residuals(m),    # Residuals
+                fitted = fitted(m),          # Fitted values
+                cooks = cooks.distance(m))   # Cook's D
+
+d &lt;- mutate(d, observation = 1:nrow(d))      # Observation number
+```
+
+--
+
+.small[
+
+```
+##     residuals    fitted        cooks observation
+## 4 -0.25218072 0.3855141 1.104107e-02           1
+## 5 -0.36081280 1.0274795 1.403343e+00           2
+## 6  0.37705353 0.3896131 2.422542e-02           3
+## 7 -0.02408421 0.4074175 9.247658e-05           4
+## 9 -0.06714006 0.4004734 7.353601e-04           5
+```
+]
+
+---
+class: split-50
+# Normality
+
+.columnl[
+#### Histogram of residuals
+.small[
+
+```r
+ggplot(data = d, aes(x = residuals)) +
+  geom_histogram(bins = 20)
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-26-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+.columnr[
+#### QQ Normality plot of residuals
+.small[
+
+```r
+ggplot(data = d, aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line()
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+class: split-40
+# Variance and Influence
+
+.columnl[
+#### Check heteroscedasticity
+.small[
+
+```r
+ggplot(d, aes(x = fitted, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+.columnr[
+#### Cook's D
+.small[
+
+```r
+ggplot(d, aes(x = observation, y = cooks)) +
+  geom_point() +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  geom_hline(yintercept = 4/nrow(msleep), linetype = "dashed")
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+--
+
+.box-b[Definitely have some problems]
+
+---
+class: split-40
+# Diagnostics with `ggfortify`
+
+.columnl[
+- Uses `autoplot`
+- Choose `which` plots to show
+    - 1 = Residuals vs. fitted
+    - 2 = QQ Norm
+    - 4 = Cook's Distance
+    - Others available
+]
+.columnr[
+
+```r
+library(ggfortify)
+autoplot(m, which = c(1, 2, 4)) 
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Transformations
+
+#### Let's try a log transformation
+
+- Normally you would only transform the `y` value
+- But mass data often works best with log10 or ln transformations (isometry)
+- So we'll transform both x and y here
+
+
+```r
+msleep_log &lt;- mutate(msleep,
+                     sleep_cycle = log10(sleep_cycle),
+                     bodywt = log10(bodywt),
+                     brainwt = log10(brainwt))
+
+m_log &lt;- lm(sleep_cycle ~ bodywt, data = msleep_log)
+```
+
+![:spacer 15px]()
+
+**Note:**  
+
+- By default `log()` takes the ln. Use `log10()` if you want base 10
+
+
+---
+# Multicollinearity (collinearity)
+
+Only relevant with more than one explanatory variable
+
+
+```r
+m_mult &lt;- lm(sleep_cycle ~ bodywt + brainwt, data = msleep_log)
+```
+
+--
+
+### Use the `car` package to get the `vif()` function
+
+```r
+library(car)
+vif(m_mult)
+```
+
+```
+##   bodywt  brainwt 
+## 13.30615 13.30615
+```
+
+Hmm, that's pretty high (looking for &lt; 10)
+
+---
+# Multicollinearity (collinearity)
+
+#### Look at our two explanatory variables:
+
+```r
+ggplot(data = msleep_log, aes(x = brainwt, y = bodywt)) +
+  geom_point() +
+  stat_smooth(method = "lm")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.box-b[Highly correlated!]
+
+---
+layout: true
+# Interpreting linear models
+
+
+```r
+summary(m_log)
+```
+
+
+.compact[.small[
+
+```
+## 
+## Call:
+## lm(formula = sleep_cycle ~ bodywt, data = msleep_log)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.36819 -0.13517 -0.01879  0.05897  0.36550 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -0.49439    0.03074 -16.082 2.72e-16 ***
+## bodywt       0.18705    0.02197   8.515 1.68e-09 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.1734 on 30 degrees of freedom
+##   (51 observations deleted due to missingness)
+## Multiple R-squared:  0.7073,	Adjusted R-squared:  0.6976 
+## F-statistic: 72.51 on 1 and 30 DF,  p-value: 1.679e-09
+```
+
+]]
+---
+
+---
+![:hl 52%, 35%, 43%, 30px]()
+![:box 30%, 60%, 30%](Model)
+
+---
+![:hl 78%, 59%, 190px, 75px]()
+![:box 30%, 60%, 30%](Effects!)
+
+---
+![:hl 78%, 59%, 190px, 75px]()
+![:label 76%, 61%, 15%](Intercept)
+
+--
+
+![:box 30%, 59%, 50%](For &lt;code&gt;bodywt&lt;/code&gt; of 0 kg (log10 units&amp;rpar;,&lt;br&gt;species has sleep cycle of -0.494 hours (log10 units&amp;rpar;)
+
+---
+![:hl 78%, 59%, 190px, 75px]()
+![:label 76%, 65%, 15%](Slope)
+
+--
+
+![:box 30%, 59%, 50%](For each 1 kg (log10 units&amp;rpar; increase in &lt;code&gt;bodywt&lt;/code&gt;&lt;br&gt;sleep cycle increases by 0.187 hours (log10 units&amp;rpar;)
+
+---
+![:hl 78%, 59%, 190px, 75px]()
+![:box 30%, 59%, 30%](y = mx + b)
+
+--
+
+![:box 30%, 59%, 30%](y = 0.187x - 0.494)
+
+---
+
+![:hl 69.5%, 59%, 100px, 75px]()
+![:box 30%, 59%, 30%](Variability in the estimate)
+
+---
+
+![:hl 53.5%, 59%, 190px, 75px]()
+![:box 30%, 59%, 30%](Significance of the results)
+
+---
+
+![:hl 53.5%, 59%, 190px, 75px]()
+![:label 50%, 60%, 48%](Is the &lt;strong&gt;intercept&lt;/strong&gt; significantly different from zero?&lt;br&gt;(Yes, P &lt; 0.0001&amp;rpar;)
+
+---
+
+![:hl 53.5%, 59%, 190px, 75px]()
+![:label 50%, 64%, 48%](Is the &lt;strong&gt;slope&lt;/strong&gt; significantly different from zero?&lt;br&gt;(Yes, P &lt; 0.0001&amp;rpar;)
+
+---
+![:hl 53.5%, 59%, 190px, 75px]()
+![:label 50%, 64%, 48%](Is there a significant relationship between our variables? (&lt;strong&gt;Yes&lt;/strong&gt;&amp;rpar;)
+
+
+---
+![:hl 73%, 85.5%, 21%, 25px]()
+![:label 70%, 85%, 10%](R&lt;sup&gt;2&lt;/sup&gt;)
+
+---
+![:hl 48%, 85.5%, 21%, 25px]()
+![:label 45%, 85%, 40%](R&lt;sup&gt;2&lt;/sup&gt; Adjusted for the number of variables)
+
+
+---
+class: split-50
+layout: false
+# ANOVAs
+
+#### Same as before, but now with categorical variables (`vore` &amp; `conservation`)
+
+
+```r
+m &lt;- lm(sleep_total ~ vore + conservation, data = msleep)
+```
+
+--
+
+#### What are these variables?
+
+.small[
+.columnl[
+
+```r
+count(msleep, vore)
+```
+
+```
+## # A tibble: 5 × 2
+##   vore        n
+##   &lt;chr&gt;   &lt;int&gt;
+## 1 carni      19
+## 2 herbi      32
+## 3 insecti     5
+## 4 omni       20
+## 5 &lt;NA&gt;        7
+```
+]
+
+.columnr[
+
+```r
+count(msleep, conservation)
+```
+
+```
+## # A tibble: 7 × 2
+##   conservation     n
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 cd               2
+## 2 domesticated    10
+## 3 en               4
+## 4 lc              27
+## 5 nt               4
+## 6 vu               7
+## 7 &lt;NA&gt;            29
+```
+]]
+
+![:spacer 150px]()
+
+cd = conservation dependent, lc = least concern, vu = vulnerable, nt = non-threatened, en = endangered, etc.
+
+--
+
+![:box 50%, 75%, 60%](&lt;strong&gt;Note&lt;/strong&gt;: This makes no sense!&lt;br&gt;Why would conservation status ever predict sleep?)
+
+
+---
+layout: true
+# Interpreting ANOVA *summaries*
+
+.small[
+
+```r
+summary(m)
+```
+
+
+```
+## 
+## Call:
+## lm(formula = sleep_total ~ vore + conservation, data = msleep)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.1632 -2.7702  0.2547  2.8866  6.4368 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)                 3.851      3.041   1.266  0.21231   
+## voreherbi                  -3.101      1.431  -2.167  0.03585 * 
+## voreinsecti                 1.853      2.800   0.662  0.51174   
+## voreomni                   -1.401      1.945  -0.720  0.47525   
+## conservationdomesticated    6.040      3.265   1.850  0.07121 . 
+## conservationen             10.262      3.688   2.783  0.00797 **
+## conservationlc              9.414      3.141   2.997  0.00452 **
+## conservationnt             11.450      3.638   3.147  0.00299 **
+## conservationvu              4.407      3.353   1.314  0.19575   
+## ---
+```
+]
+
+---
+
+---
+![:hl 43%, 63%, 51%, 72px]()
+![:box 20%, 40%, 25%](Treatment Contrasts)
+![:label 40%, 63%, 35%](Effect of &lt;code&gt;vore&lt;/code&gt; categories, each compared to first category (&lt;code&gt;carni&lt;/code&gt;&amp;rpar;)
+
+--
+![:label 40%, 63%, 35%](&lt;small&gt;&lt;strong&gt;For example&lt;/strong&gt;&lt;br&gt;Total sleep in herbivores (&lt;code&gt;herbi&lt;/code&gt;&amp;rpar; is significantly (P = 0.03585&amp;rpar; lower (Est = -3.101&amp;rpar; than in carnivores (&lt;code&gt;carni&lt;/code&gt;, base-line category&amp;rpar;&lt;/small&gt;)
+
+---
+![:hl 43%, 74%, 51%, 117px]()
+![:box 20%, 40%, 25%](Treatment Contrasts)
+![:label 40%, 75%, 35%](Effect of &lt;code&gt;conservation&lt;/code&gt; categories, each compared to first category (&lt;code&gt;cd&lt;/code&gt;&amp;rpar;)
+
+---
+layout: true
+# Interpreting ANOVA *tables*
+
+
+```r
+anova(m)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Response: sleep_total
+##              Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## vore          3 167.57  55.856  3.1960 0.032757 * 
+## conservation  5 342.97  68.595  3.9249 0.005095 **
+## Residuals    43 751.51  17.477                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+
+---
+![:hl 44%, 43%, 50%, 25px]()
+![:label 41%, 45%, 40%](Overall differences among categories of &lt;code&gt;vore&lt;/code&gt;)
+
+---
+![:hl 44%, 47%, 50%, 25px]()
+![:label 41%, 49%, 40%](Overall differences among categories of &lt;code&gt;conservation&lt;/code&gt;)
+
+---
+![:box 50%, 75%, 40%](This is a &lt;strong&gt;Type I ANOVA&lt;strong&gt;)
+
+---
+layout: false
+class: split-50
+
+# Interpreting ANOVA *tables*
+
+
+.columnl[
+## Type II ANOVA
+
+```r
+library(car)
+Anova(m, type = "2")
+```
+
+```
+## Anova Table (Type II tests)
+## 
+## Response: sleep_total
+##              Sum Sq Df F value   Pr(&gt;F)   
+## vore         121.75  3  2.3220 0.088502 . 
+## conservation 342.97  5  3.9249 0.005095 **
+## Residuals    751.51 43                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+.columnr[
+## Type III ANOVA
+
+```r
+library(car)
+Anova(m, type = "3")
+```
+
+```
+## Anova Table (Type III tests)
+## 
+## Response: sleep_total
+##              Sum Sq Df F value   Pr(&gt;F)   
+## (Intercept)   28.01  1  1.6029 0.212313   
+## vore         121.75  3  2.3220 0.088502 . 
+## conservation 342.97  5  3.9249 0.005095 **
+## Residuals    751.51 43                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+---
+class: section
+# ANOVAs and Post-Hoc Tests
+
+---
+class: split-50
+# Chicks and Diet
+
+.columnl[
+### Prep data 
+
+```r
+chicks &lt;- filter(ChickWeight, 
+                 Time == 21, 
+                 !(Chick %in% 1:7))
+head(chicks)
+```
+
+```
+## Grouped Data: weight ~ Time | Chick
+##   weight Time Chick Diet
+## 1     98   21     9    1
+## 2    124   21    10    1
+## 3    175   21    11    1
+## 4    205   21    12    1
+## 5     96   21    13    1
+## 6    266   21    14    1
+```
+]
+
+.columnr[
+### How many chicks per diet?
+
+```r
+count(chicks, Diet)
+```
+
+```
+## Grouped Data: weight ~ Time | Chick
+##   Diet  n
+## 1    1  9
+## 2    2 10
+## 3    3 10
+## 4    4  9
+```
+]
+
+---
+class: split-50
+# Chicks and Diet
+
+4 different diets, how do chicks gain weight on each diet?
+
+
+```r
+m &lt;- lm(weight ~ Diet, data = chicks)
+```
+
+--
+
+.columnl[
+
+```r
+anova(m)
+```
+
+
+.compact[.small[
+
+```
+## Analysis of Variance Table
+## 
+## Response: weight
+##           Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## Diet       3  68673 22891.0  5.5334 0.003331 **
+## Residuals 34 140654  4136.9                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+]]
+]
+
+--
+
+.columnr[
+
+```r
+summary(m)
+```
+
+.compact[.small[
+
+```
+## 
+## Call:
+## lm(formula = weight ~ Diet, data = chicks)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -140.700  -39.414   -1.056   40.908  116.300 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   153.33      21.44   7.152 2.87e-08 ***
+## Diet2          61.37      29.55   2.077 0.045472 *  
+## Diet3         116.97      29.55   3.958 0.000365 ***
+## Diet4          85.22      30.32   2.811 0.008143 ** 
+## ---
+```
+
+]]
+]
+
+--
+
+![:box 75%, 77%, 45%](Need post-hoc tests to&lt;br&gt;test each Diet against the others)
+
+---
+# Post-Hoc Tests
+
+.medium[
+
+```r
+library(multcomp)
+mult_pairwise &lt;- glht(m, linfct = mcp(Diet = "Tukey"))  # All Pair-wise comparisons
+```
+]
+
+- Package `multcomp`
+- Function `glht()` (**g**eneral **l**inear **h**ypothesis **t**esting)
+- Model of interest (here, **m**)
+- Argument `linfct` (**lin**ear **f**un**ct**ion, i.e., Which post-hoc tests?)
+- Function `mcp()` (**m**ultiple **c**om**p**arisons)
+- Specify the variable you want to compare (Here, **Diet**)
+- Specify the way the categories should be compared:
+    - `"Tukey"` reflects **Tukey Contrasts** (i.e., all pairwise comparisons)
+    - `"Dunnett"` reflects **Dunnett's comparison with a control**
+
+
+---
+# Post-Hoc Tests
+
+### All pair-wise comparisons
+
+.small[
+
+```r
+summary(mult_pairwise)
+```
+
+```
+## 	 Simultaneous Tests for General Linear Hypotheses
+## 
+## Multiple Comparisons of Means: Tukey Contrasts
+## 
+## 
+## Fit: lm(formula = weight ~ Diet, data = chicks)
+## 
+## Linear Hypotheses:
+##            Estimate Std. Error t value Pr(&gt;|t|)   
+## 2 - 1 == 0    61.37      29.55   2.077  0.18124   
+## 3 - 1 == 0   116.97      29.55   3.958  0.00186 **
+## 4 - 1 == 0    85.22      30.32   2.811  0.03873 * 
+## 3 - 2 == 0    55.60      28.76   1.933  0.23359   
+## 4 - 2 == 0    23.86      29.55   0.807  0.85056   
+## 4 - 3 == 0   -31.74      29.55  -1.074  0.70723   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## (Adjusted p values reported -- single-step method)
+```
+]
+
+![:hl 58%, 41%, 145px, 25px]()
+
+![:box 25%, 50%, 40%](Each group compared to each other&lt;br&gt;&lt;code&gt;2 - 1 == 0&lt;/code&gt; reflects hypothesis that&lt;br&gt;Diet 2 - Diet 1 is equal to 0&lt;br&gt;(i.e., no difference&amp;rpar;) 
+
+--
+
+![:hl 55%, 92%, 475px, 25px]()
+
+---
+# Post-Hoc Tests
+
+### Specify the P-Value adjustment
+
+.small[
+
+```r
+summary(mult_pairwise, test = adjusted("BH"))
+```
+
+```
+## 	 Simultaneous Tests for General Linear Hypotheses
+## 
+## Multiple Comparisons of Means: Tukey Contrasts
+## 
+## 
+## Fit: lm(formula = weight ~ Diet, data = chicks)
+## 
+## Linear Hypotheses:
+##            Estimate Std. Error t value Pr(&gt;|t|)   
+## 2 - 1 == 0    61.37      29.55   2.077  0.09094 . 
+## 3 - 1 == 0   116.97      29.55   3.958  0.00219 **
+## 4 - 1 == 0    85.22      30.32   2.811  0.02443 * 
+## 3 - 2 == 0    55.60      28.76   1.933  0.09241 . 
+## 4 - 2 == 0    23.86      29.55   0.807  0.42515   
+## 4 - 3 == 0   -31.74      29.55  -1.074  0.34837   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## (Adjusted p values reported -- BH method)
+```
+]
+
+
+![:box 25%, 70%, 40%]("BH" = Benjamini-Hochberg,&lt;br&gt;also known as FDR test&lt;br&gt;(see &lt;a href = "https://academic.oup.com/beheco/article/15/6/1044/206216"&gt;here for more details&lt;/a&gt;&amp;rpar;)
+![:hl 55%, 92%, 475px, 25px]()
+
+
+---
+class: full-width
+# Post-Hoc Tests
+
+.medium[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Argument &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; P-Value Adjustment &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; single-step &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Adjusted p values based on the joint normal or t distribution of the linear function &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; Shaffer &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://www.tandfonline.com/doi/abs/10.1080/01621459.1986.10478341"&gt;Shaffer Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; Westfall &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://www.tandfonline.com/doi/abs/10.1080/01621459.1997.10473627"&gt;Westfall Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; free &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://www.amazon.com/Multiple-Comparisons-Tests-Using-System/dp/1580253970"&gt;Multiple testing procedures under free combinations&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; holm &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="http://www.jstor.org/stable/4615733"&gt;Holm Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; hochberg &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://doi.org/10.1093/biomet/75.4.800"&gt;Hochberg Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; hommel &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://doi.org/10.1093/biomet/75.2.383"&gt;Hommel Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; bonferroni &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Bonferroni Correction &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; BH or fdr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="http://www.jstor.org/stable/2346101"&gt;Benjamini-Hochberg Test or False Discovery Rate Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; BY &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; &lt;a href="https://projecteuclid.org/euclid.aos/1013699998"&gt;Benjamini-Yekutieli Test&lt;/a&gt; &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; none &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; No P-Value Adjustment &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+class: section
+# Data Transformations
+
+---
+class: split-50
+# Transformations
+
+.columnl[
+.small[
+
+```r
+m &lt;- lm(sleep_cycle ~ bodywt, data = msleep)
+
+d &lt;- data.frame(residuals = residuals(m),
+                std_residuals = rstudent(m),
+                fitted = fitted(m),
+                cooks = cooks.distance(m))
+
+d &lt;- mutate(d, observation = 1:nrow(d))
+```
+]]
+
+.columnr[
+.small[
+
+```r
+ggplot(data = d, aes(sample = std_residuals)) +
+  stat_qq() +
+  stat_qq_line()
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-57-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+![:box 75%, 75%, 45%](Good for addressing non-normality of residuals, and problems with variance)
+
+---
+class: space-list
+# Transformations
+
+#### Order of Operations
+1. See the need (e.g., non-normal residuals, heteroscedacity)
+2. Figure out which transformation
+3. Apply the transformation
+4. Check model assumptions
+5. Rinse and repeat as needed
+
+
+---
+class: split-60
+# Transformations: Common options
+
+### Table of transformations in R
+
+.columnl[
+![:spacer 5px]()
+.small[
+.spread[
+
+```r
+data_trans &lt;- mutate(data, y_trans = 1/y^2)
+data_trans &lt;- mutate(data, y_trans = 1/y)
+data_trans &lt;- mutate(data, y_trans = 1/sqrt(y))
+data_trans &lt;- mutate(data, y_trans = log(y))
+data_trans &lt;- mutate(data, y_trans = log10(y))
+data_trans &lt;- mutate(data, y_trans = sqrt(y))
+data_trans &lt;- mutate(data, y_trans = y^2)
+data_trans &lt;- mutate(data, y_trans = asin(sqrt(y/100)))
+data_trans &lt;- mutate(data, y_trans = (y^lambda - 1)/lambda)
+```
+]]]
+
+.columnr[
+&lt;table class="table" style="font-size: 18px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Transformation &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; R Code &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse square &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; 1/y^2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Reciprocal &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; 1/y &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse square root &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; 1/sqrt(y) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Natural log (ln) &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; log(y) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Log base 10 &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; log10(y) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Square root &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; sqrt(y) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Square &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; y^2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Box Cox &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; (y^lambda - 1) / lambda &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Arcsine-sqare-root &lt;/td&gt;
+   &lt;td style="text-align:left;font-family: monospace;"&gt; asin(sqrt(y/100)) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+![:box 50%, 88%, 85%](&lt;code&gt;data_trans&lt;/code&gt; is the NEW data frame, &lt;code&gt;y_trans&lt;/code&gt; is your TRANSFORMED y-value)
+
+---
+class: space-list
+background-image: url(figures/boxcox_cropped.png)
+background-size: 30%
+background-position: bottom 0px center
+
+# Transformations: How to choose?
+
+- Based on what you know (often discipline specific standards for certain data types)
+- Based on what you see (does it look exponential or logarithmic?)
+- Based on trial and error (try different transformations and see how it goes)
+- Based on Box-Cox lambda `\((\lambda)\)`  
+
+.center[
+**Can EITHER apply `\(\lambda\)` through Box-Cox transformation OR use it to indicate best transformation**]
+  
+
+
+---
+class: split-50
+background-image: url(figures/boxcox-1.png)
+background-size: 45%
+background-position: bottom 10px right 10px
+
+# Transformations: Find `\(\lambda\)`
+
+.columnl[
+## Plot of `\(\lambda\)`
+
+```r
+library(MASS)
+b &lt;- boxcox(m)
+```
+
+## Exact `\(\lambda\)`
+
+
+```r
+b$x[b$y == max(b$y)]
+```
+
+```
+## [1] -0.2626263
+```
+]
+
+
+---
+# Apply the transformation
+
+
+```r
+msleep_trans &lt;- mutate(msleep, sleep_cycle = (sleep_cycle^(-0.26) - 1) / -0.26)
+m_trans &lt;- lm(sleep_cycle ~ bodywt, data = msleep_trans)
+```
+
+&lt;img src="6 Basic Statistics_files/figure-html/unnamed-chunk-63-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+layout:false
+class: section
+# Generalized Linear Models
+
+---
+# Generalized Linear Models
+
+### Normal distribution - Gaussian Distribution
+
+```r
+lm(y ~ x1 * x2, data = my_data)
+```
+
+### Count data - Poisson Family
+
+```r
+glm(counts ~ x1 * x2, family = "poisson", data = my_data)
+```
+
+### Binary (0/1, Logistic Regression) - Binomial Distribution
+
+```r
+glm(y ~ x1 * x2, family = "binomial", data = my_data)
+```
+
+### Proportion with binary outcomes (10 yes, 5 no) - Binomial Distribution
+
+
+```r
+glm(cbind(Yes, No) ~ x1 * x2, family = "binomial", data = my_data)
+```
+
+---
+# Poisson - Run
+
+
+### Download data
+
+```r
+p &lt;- read.csv("https://stats.idre.ucla.edu/stat/data/poisson_sim.csv")
+p &lt;- mutate(p, program = factor(prog, levels = 1:3, 
+                                labels = c("General", "Academic","Vocational")))
+head(p)
+```
+
+```
+##    id num_awards prog math    program
+## 1  45          0    3   41 Vocational
+## 2 108          0    1   41    General
+## 3  15          0    3   44 Vocational
+## 4  67          0    3   42 Vocational
+## 5 153          0    3   40 Vocational
+## 6  51          0    1   42    General
+```
+
+
+### Run model
+
+```r
+m &lt;- glm(num_awards ~ program + math, family = "poisson", data = p)
+```
+
+---
+class: split-60
+# Poisson - Evaluate
+
+.columnl[
+.small[
+
+```r
+summary(m)
+```
+
+```
+## glm(formula = num_awards ~ program + math, family = "poisson", 
+##     data = p)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.2043  -0.8436  -0.5106   0.2558   2.6796  
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)       -5.24712    0.65845  -7.969 1.60e-15 ***
+## programAcademic    1.08386    0.35825   3.025  0.00248 ** 
+## programVocational  0.36981    0.44107   0.838  0.40179    
+## math               0.07015    0.01060   6.619 3.63e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 287.67  on 199  degrees of freedom
+## Residual deviance: 189.45  on 196  degrees of freedom
+```
+]]
+.columnr[
+
+Look at deviance vs. df:
+
+
+```r
+deviance(m)
+```
+
+```
+## [1] 189.4496
+```
+
+```r
+df.residual(m)
+```
+
+```
+## [1] 196
+```
+
+```r
+deviance(m) / df.residual(m)
+```
+
+```
+## [1] 0.9665797
+```
+
+Nice! (should be close to 1)
+]
+
+
+
+---
+# Binary (0/1 - Logistic Regression)
+
+### Data
+
+```r
+binary &lt;- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+head(binary)
+```
+
+```
+##   admit gre  gpa rank
+## 1     0 380 3.61    3
+## 2     1 660 3.67    3
+## 3     1 800 4.00    1
+## 4     1 640 3.19    4
+## 5     0 520 2.93    4
+## 6     1 760 3.00    2
+```
+
+### Run model
+
+```r
+m &lt;- glm(admit ~ gpa, family = "binomial", data = binary)
+```
+
+---
+class: split-60
+# Binary (0/1 - Logistic Regression)
+
+.columnl[
+### Check results
+.small[
+
+```r
+summary(m)
+```
+
+```
+## Call:
+## glm(formula = admit ~ gpa, family = "binomial", data = binary)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.1131  -0.8874  -0.7566   1.3305   1.9824  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -4.3576     1.0353  -4.209 2.57e-05 ***
+## gpa           1.0511     0.2989   3.517 0.000437 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 499.98  on 399  degrees of freedom
+## Residual deviance: 486.97  on 398  degrees of freedom
+```
+]
+]
+
+.columnr[
+### Convert to Odd's Ratios
+
+
+```r
+exp(coef(m))
+```
+
+```
+## (Intercept)         gpa 
+##  0.01280926  2.86082123
+```
+
+
+e.g., The odds of being admitted increase by a factor of 2.86 (x2.86 times more likely) for every unit increase in GPA.
+]
+
+---
+# Binary Outcomes
+
+Proportion with binary outcomes (e.g., 10 yes, 5 no)
+
+### Get the data
+.small[
+
+```r
+admissions &lt;- as.data.frame(UCBAdmissions)
+admissions &lt;- spread(admissions, Admit, Freq)
+head(admissions)
+```
+
+```
+##   Gender Dept Admitted Rejected
+## 1   Male    A      512      313
+## 2   Male    B      353      207
+## 3   Male    C      120      205
+## 4   Male    D      138      279
+## 5   Male    E       53      138
+## 6   Male    F       22      351
+```
+]
+
+### Run model
+
+
+```r
+m &lt;- glm(cbind(Admitted, Rejected) ~ Gender, family = "binomial", data = admissions)
+```
+
+---
+class: split-65
+# Binary Outcomes
+
+.columnl[
+### Check results
+
+.small[
+
+```r
+summary(m)
+```
+
+```
+## Call:
+## glm(formula = cbind(Admitted, Rejected) ~ Gender, family = "binomial", 
+##     data = admissions)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -16.7915   -4.7613   -0.4365    5.1025   11.2022  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -0.22013    0.03879  -5.675 1.38e-08 ***
+## GenderFemale -0.61035    0.06389  -9.553  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 877.06  on 11  degrees of freedom
+## Residual deviance: 783.61  on 10  degrees of freedom
+```
+]
+]
+
+
+.columnr[
+
+```r
+deviance(m)
+```
+
+```
+## [1] 783.607
+```
+
+```r
+df.residual(m)
+```
+
+```
+## [1] 10
+```
+
+```r
+deviance(m) / df.residual(m)
+```
+
+```
+## [1] 78.3607
+```
+
+Oops, over-dispersed
+]
+
+---
+# Binary Outcomes
+### Try again with 'quasibinomial' family
+.small[
+
+```r
+m &lt;- glm(cbind(Admitted, Rejected) ~ Gender, family = "quasibinomial", data = admissions)
+summary(m)
+```
+
+```
+## Call:
+## glm(formula = cbind(Admitted, Rejected) ~ Gender, family = "quasibinomial", 
+##     data = admissions)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -16.7915   -4.7613   -0.4365    5.1025   11.2022  
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)   -0.2201     0.3281  -0.671    0.517
+## GenderFemale  -0.6104     0.5404  -1.129    0.285
+## 
+## (Dispersion parameter for quasibinomial family taken to be 71.52958)
+## 
+##     Null deviance: 877.06  on 11  degrees of freedom
+## Residual deviance: 783.61  on 10  degrees of freedom
+```
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
