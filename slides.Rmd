@@ -44,7 +44,7 @@ labs <- tribble(
   "2_visualizations.Rmd",               "2 Visualizing Data",                  TRUE,      
   "3_loading and cleaning.Rmd",         "3 Loading and Cleaning Data",         TRUE,
   "4_summarizing_and_transforming.Rmd", "4 Summarizing and Transforming Data", TRUE,
-  "5_getting_help.Rmd",                 "5 Getting Help",                      TRUE,
+  "5_getting_help.Rmd",                 "5 Getting Help",                      FALSE,
   "6_statistics.Rmd",                   "6 Basic Statistics",                  FALSE) %>%
   mutate(f = file.path(dir, f))
 
@@ -106,7 +106,11 @@ slides <- tibble(file = list.files("./slides", full.names = TRUE),
 
 text <- slides %>%
   complete(type = c("html", "pdf"), answers = c("normal", "answers"), 
-           nesting(name = labs$nice)) %>%
+           nesting(name = labs$nice))
+
+if(after_date) text <- filter(text, !is.na(file))
+
+text <- text %>%
   mutate(file = replace_na(file, ""),
          title = glue("**{str_replace(name, '^([0-9]{1})', '\\\\1.')}**"),
          answers = if_else(answers == "normal", "", " - answers"),
