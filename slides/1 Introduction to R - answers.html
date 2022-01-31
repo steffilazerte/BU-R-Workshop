@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R</title>
+    <meta charset="utf-8" />
+    <script src="1 Introduction to R - answers_files/header-attrs-2.11/header-attrs.js"></script>
+    <link rel="stylesheet" href="pres_styles.css" type="text/css" />
+    <link rel="stylesheet" href="global_styles.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+class: title-slide, nobar
+![:img right: 25px, bottom: 25px, 50%, , ](figures/R.png)
+
+## Workshop: Dealing with Data in R
+# Getting started with R
+## Back to Basics
+
+.footnote[Steffi LaZerte &lt;https://steffilazerte.ca&gt; | *Compiled: 2022-01-28*]
+
+---
+class: space-list
+# Online workshops can be challenging
+
+- **Consider keeping your video on** .small[(if possible)]
+  - We're here together!
+  - Kids? Pets? Spouses? No problem
+  - But ultimately, you need be comfortable! .small[(and you absolutely have the right to privacy at home)]
+
+- **Interrupt me!**
+  - Generally keep yourself muted but un-mute anytime to ask questions
+
+- **Ask Questions!**
+  - Group trouble-shooting is really valuable
+  - If you have a problem, others may also (or may have it in the future)
+  
+- **Screen-sharing**
+  - I may ask you to share your screen with the group .small[(feel free to decline)]
+  - For privacy, close your email etc. Or just share your RStudio window
+
+
+
+---
+class: nobar
+background-image: url(figures/office.jpg)
+background-size: cover
+background-position: center
+
+# **This is me!**
+
+---
+class: nobar
+
+![:img left: -20px, bottom: -70px, 52%](figures/steffi_and_nami.jpg)
+![:img right: 0, bottom: 0, 50%](figures/alex_and_nami.jpg)
+
+# **These are my creatures**
+
+---
+class: nobar
+
+![:img center, bottom: 0, 100%](figures/garden.jpg)
+
+# **This is my garden**
+
+---
+# **This is my work***
+
+
+![:img right:38%, bottom: 48%, 15%](https://avatars.githubusercontent.com/u/916280?s=200&amp;v=4)
+
+![:img right:10%, bottom: 51%, 20%](https://upload.wikimedia.org/wikipedia/commons/c/c9/Rural_Hours_-_Red-Headed_Woodpecker.jpg)
+
+![:img left:13%, bottom: 65%, 10%](https://upload.wikimedia.org/wikipedia/commons/e/ef/Moose_%28PSF%29.png)
+
+![:img right:10%, bottom: 21%, 20%](https://upload.wikimedia.org/wikipedia/commons/7/7f/Western_Rattlesnake_%28Crotalus_oreganus%29_illustration.jpg)
+
+![:img left:10%, bottom: 8%, 10%](https://upload.wikimedia.org/wikipedia/commons/a/ad/Meat_ant.jpg)
+
+
+![:img left: 42%, bottom: 15%, 15%](https://rstudio-education.github.io/shiny-course/images/shiny.png)
+
+![:img left:10%, bottom: 30%, 15%](https://raw.githubusercontent.com/ropensci/weathercan/master/inst/assets/weathercan_logo.png)
+
+![:img left:20%, bottom: 10%, 25%](https://motus.org/images/motus-logo.png)
+
+![:img right:50%, bottom: 30%, 25%](https://camo.githubusercontent.com/8eb3f9bc0f60dfac66ad867126346c96c67bc58f567c7a2bc60005d6feeec764/68747470733a2f2f7261776769742e636f6d2f726f70656e7363692f6c6f676f732f6d61737465722f69636f6e5f73686f72745f636f6c6f722e737667)
+
+![:img right:24%, bottom: 23%, 15%](https://raw.githubusercontent.com/rstudio/rmarkdown/main/man/figures/logo.png)
+
+![:img right:29%, bottom: 10%, 15%](https://birdscanada.b-cdn.net/wp-content/uploads/2020/02/BirdsCanada-logo-en.png)
+
+![:img right:29%, bottom: 73%, 25%](figures/logo_agri-food.png)
+
+
+
+
+.footnote[.small[(* On, with, and for)]]
+
+---
+background-image: url(figures/office.jpg)
+background-position: right 25px bottom 50px
+background-size: 50%
+
+# Introductions
+
+## Dr. Steffi LaZerte
+
+- Background in Biology (Animal Behaviour)
+- Working with R since 2007
+- Professional R programmer/consultant&lt;br&gt;since 2017
+- Fourth year giving BU R Workshop!
+- [rOpenSci](https://ropensci.org) Community Assistant
+
+---
+background-image: url(figures/alex.jpg)
+background-position: right 25px bottom 25px
+background-size: 40%
+
+# Introductions
+
+## Dr. Alex Koiter
+
+### Backup helper today
+
+- Physical Geographer
+- Working with R since 2010
+- Assistant Professor in Geography and   
+  Environment, Brandon University
+
+
+---
+class: space-list
+# What about you?
+
+- Name
+- Creatures? (share on camera!)
+- Background (Role, Area of study, etc.)
+- Familiarity with R or Programming
+- Something you're proud of!
+
+---
+# About this Workshop
+
+## Format
+- I will provide you tools and workflow to get started with R
+- We'll have hands-on, lecture, and demonstrations
+
+
+.spacer[]
+
+## R is hard: But have no fear!
+- Don't expect to remember everything!
+- Copy/Paste is your friend (never apologize for using it!)
+- Consider this workshop a resource to return to
+
+---
+# About this Workshop
+
+## Format
+- I will provide you tools and workflow to get started with R
+- We'll have hands-on, lecture, and demonstrations
+
+
+.spacer[]
+
+## R is hard: But have no fear!
+- **Don't expect to remember everything!**
+- Copy/Paste is your friend (never apologize for using it!)
+- Consider this workshop a resource to return to
+
+---
+background-image: url(figures/impostR_en.png)
+background-position: center center
+background-size: 70%
+
+# Impost**R** Syndrome
+
+---
+background-image: url(figures/impostR_en.png)
+background-position: right 75px top 25%
+background-size: 30%
+
+# Impost**R** Syndrome
+
+![:img left: 25px, bottom: 175px, 60%, , David Whittaker](figures/imposter.jpg)
+
+--
+
+![:box 50%, 80%, 75%](&lt;strong&gt;Moral of the story?&lt;/strong&gt;&lt;br&gt;Make friends, code in groups, learn together and don't beat yourself up)
+
+
+---
+class: nobar
+![:img center, bottom: 0, 53%, ,](https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/r_first_then.png)
+
+
+.footnote[Artwork by [@allison_horst](https://github.com/allisonhorst/stats-illustrations)]
+
+
+
+
+---
+class: section
+
+# All about R
+
+---
+layout: true
+# Why R?
+
+---
+background-image: url(figures/R_hard.png)
+background-position: right 15% bottom 10%
+background-size: 70%
+
+## R is hard
+
+---
+background-image: url(figures/R_powerful2_edit.png)
+background-position: center bottom 40%
+background-size: 70%
+
+## But R is powerful (and reproducible)!
+
+--
+
+.footnote[(I made these slides with **R**markdown)]
+
+---
+background-image: url(figures/spatial.png)
+background-position: center bottom 10%
+background-size: 40%
+
+## R is also beautiful
+
+---
+background-image: url(figures/R_free.png)
+background-position: center bottom 40%
+background-size: 70%
+
+## R is affordable (i.e., free!)
+
+
+---
+layout: false
+class: section
+
+# What is R?
+
+---
+# R is Programming language
+
+&gt; A programming **language** is a way to give instructions in order to get a computer to do something
+
+- You need to know the language (i.e., the code)
+- Computers don't know what you mean, only what you type (unfortunately)
+- Spelling, punctuation, and capitalization all matter!
+
+## For example
+
+**R, what is 56 times 5.8?**
+
+
+```r
+56 * 5.8
+```
+
+```
+## [1] 324.8
+```
+
+---
+# Use code to tell R what to do
+
+**R, what is the average of numbers 1, 2, 3, 4?**
+
+
+```r
+mean(c(1, 2, 3, 4))
+```
+
+```
+## [1] 2.5
+```
+
+--
+
+**R, save this value for later**
+
+
+```r
+steffis_mean &lt;- mean(c(1, 2, 3, 4))
+```
+
+--
+
+**R, multiply this value by 6**
+
+
+```r
+steffis_mean * 6
+```
+
+```
+## [1] 15
+```
+
+---
+class: split-50
+# Code, Output, Scripts
+
+.columnl[
+## Code
+- The actual commands
+
+## Output
+- The result of running code or a script
+
+## Script
+- A text file full of code that you want to run
+- You should always keep your code in a script
+]
+
+
+--
+
+.columnr[
+
+## For example:
+
+
+```r
+mean(c(1, 2, 3, 4))
+```
+
+```
+## [1] 2.5
+```
+]
+
+
+![:here right: 100px, top: 200px](&lt;strong&gt;Code&lt;/strong&gt;)
+![:here right: 100px, top: 250px](&lt;strong&gt;Output&lt;/strong&gt;)
+
+![:here right: 100px, top: 310px](&lt;strong&gt;Script&lt;/strong&gt;)
+
+![:img right: 200px, bottom: 5px, 30%, ,](figures/script.png)
+
+
+
+
+
+---
+# RStudio vs. R
+
+![:img left: 15%, top: 125px, 300px, , RStudio](figures/RStudio-Ball.png)
+![:img right: 15%, top: 125px, 400px, , R](figures/R.png)
+
+
+
+![:spacer 175px]()
+
+- **RStudio** is not **R**
+- RStudio is a User Interface or IDE (integrated development environment)
+    - (i.e., Makes coding simpler)
+- But sometimes tries to be **too** helpful
+
+---
+# RStudio Features
+
+## Changing Options: Tools &gt; Global Options
+
+- General &gt; Restore RData into workspace at startup (NO!)
+- General &gt; Save workspace to on exit (NEVER!)
+- Code &gt; Insert matching parens/quotes (Personal preference)
+
+## Projects
+- Handles working directories
+- Organizes your work
+
+## Packages
+- Can use the package manager to install packages
+- Can use the manager to load them as well, but not recommended
+
+
+---
+class: section
+
+# Let's take a look at RStudio
+
+
+---
+class: section
+
+# Your first *real* code!
+
+---
+# First Code
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+.spacer[ ]
+
+- Copy/paste or type this into the script window in RStudio
+  - You may have to go to File &gt; New File &gt; R Script
+- Click anywhere on the first line of code
+- Use the 'Run' button to run this code, **or** use the short-cut `Ctrl-Enter`
+    - Repeat until all the code has run
+
+---
+layout: true
+# First Code
+
+---
+
+
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-gjbqk38-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(&lt;span style="background-color:#ffff7f"&gt;tidyverse&lt;/span&gt;)&lt;br&gt;library(&lt;span style="background-color:#ffff7f"&gt;palmerpenguins&lt;/span&gt;)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-s5nc54w-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 50%, 20%, 40%](Packages&lt;br&gt;
+&lt;code&gt;tidyverse&lt;/code&gt; and &lt;code&gt;palmerpenguins&lt;/code&gt;)
+
+---
+
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;&lt;span style="background-color:#ffff7f"&gt;library&lt;/span&gt;(tidyverse)&lt;br&gt;&lt;span style="background-color:#ffff7f"&gt;library&lt;/span&gt;(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;&lt;span style="background-color:#ffff7f"&gt;ggplot&lt;/span&gt;(data = penguins, &lt;span style="background-color:#ffff7f"&gt;aes&lt;/span&gt;(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;&lt;span style="background-color:#ffff7f"&gt;geom_point&lt;/span&gt;()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-9f345n0-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 25%, 15%, 30%](Functions:&lt;br&gt;
+&lt;code&gt;library(&amp;rpar;&lt;/code&gt;, &lt;code&gt;ggplot(&amp;rpar;&lt;/code&gt;&lt;br&gt;&lt;code&gt;aes(&amp;rpar;&lt;/code&gt;, and &lt;code&gt;geom_point(&amp;rpar;&lt;/code&gt;)
+
+---
+
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) &lt;span style="background-color:#ffff7f"&gt;+&lt;/span&gt;&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-k8t71rq-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 14.5%, 25%, 25%](&lt;code&gt;+&lt;/code&gt;&lt;br&gt;(Specific to &lt;code&gt;ggplot&lt;/code&gt;&amp;rpar;)
+
+---
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-tvnuze3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 22%, 57%, 17%](Figure!)
+
+---
+
+&lt;code class ='r hljs remark-code'&gt;# First load the packages&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;# Now create the figure&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-dzcna7h-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 23%, 48%, 18%](Warning)
+
+---
+
+
+&lt;code class ='r hljs remark-code'&gt;&lt;span style="background-color:#ffff7f"&gt;# First load the packages&lt;/span&gt;&lt;br&gt;library(tidyverse)&lt;br&gt;library(palmerpenguins)&lt;br&gt;&lt;br&gt;&lt;span style="background-color:#ffff7f"&gt;# Now create the figure&lt;/span&gt;&lt;br&gt;ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm, colour = species)) +&lt;br&gt;&amp;nbsp;&amp;nbsp;geom_point()&lt;/code&gt;
+
+```
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+```
+
+
+&lt;img src="1 Introduction to R - answers_files/figure-html/first_code-flaired-fdbcj8e-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+![:box 50%, 18.5%, 20%](Comments&lt;br&gt;&lt;small&gt;(Start with &lt;code&gt;#&lt;/code&gt;&amp;rpar;)
+
+
+
+
+
+
+---
+layout:false
+class: section
+# R Basics: Objects
+
+Objects are *things* in the environment  
+
+(Check out the **Environment** pane in RStudio)
+
+
+---
+# functions()
+
+## Do things, Return things
+
+### Does something but returns nothing
+e.g., `write_csv()` - Saves the `mtcars` data frame as a csv file
+
+
+```r
+write_csv(mtcars, path = "mtcars.csv")
+```
+
+.spacer[ ]
+
+### Does something and returns something
+e.g., `sd()` - returns the standard deviation of a vector 
+
+
+```r
+sd(c(4, 10, 21, 55))
+```
+
+```
+## [1] 22.78157
+```
+
+---
+class: split-50
+# functions()
+
+- Functions can take **arguments** (think 'options')
+- `data`, `x`, `y`, `colour`
+
+
+```r
+ggplot(data = msleep, aes(x = sleep_total, y = sleep_rem, colour = vore)) +
+  geom_point()
+```
+
+--
+
+![:spacer 20px]()
+
+- Arguments defined by **name** or by **position**
+- With correct position, do not need to specify by name
+
+![:spacer 10px]()
+
+
+.columnl[
+### By name:
+
+```r
+mean(x = c(1, 5, 10))
+```
+
+```
+## [1] 5.333333
+```
+]
+
+.columnr[
+### By order:
+
+```r
+mean(c(1, 5, 10))
+```
+
+```
+## [1] 5.333333
+```
+]
+
+---
+class: split-40
+# functions()
+
+## Watch out for 'hidden' arguments
+
+.columnl[
+### By name:
+
+```r
+mean(x = c(1, 5, 10, NA), 
+     na.rm = TRUE)
+```
+
+```
+## [1] 5.333333
+```
+]
+
+--
+
+.columnr[
+### By order:
+
+```r
+mean(c(1, 5, 10, NA), 
+     TRUE)
+```
+
+```
+## Error in mean.default(c(1, 5, 10, NA), TRUE): 'trim' must be numeric of length one
+```
+]
+
+--
+![:spacer 130px]()
+
+.center[This error states that we've assigned the argument `trim` to a non-valid argument]
+
+.spacer[ ]
+
+.center[Where did **`trim`** come from?]
+
+---
+class: split-15
+# R documentation
+
+.columnl[
+
+```r
+?mean
+```
+]
+
+???
+Look up trim, do you see it?
+
+--
+![:img right: 10%, bottom: 5%, 60%, , ](figures/mean_docs.png)
+
+
+---
+class: split-40
+# Data
+
+Generally kept in `vectors` or `data.frames`
+
+- These are objects with names (like functions)
+- We can use `&lt;-` to assign values to objects (assignment)
+
+![:spacer 10px]()
+
+.columnl[
+## Vector (1 dimension)
+
+
+```r
+my_letters &lt;- c("a", "b", "c")
+my_letters
+```
+
+```
+## [1] "a" "b" "c"
+```
+]
+
+.columnr[
+## Data frame (2 dimensions)
+
+
+```r
+my_data &lt;- data.frame(x = c("s1", "s2", "s3", "s4"),
+                      y = c(101, 102, 103, 104),
+                      z = c("a", "b", "c", "d"))
+my_data
+```
+
+```
+##    x   y z
+## 1 s1 101 a
+## 2 s2 102 b
+## 3 s3 103 c
+## 4 s4 104 d
+```
+]
+
+![:box 12%, 39%, 200px](rows x columns)
+
+---
+class: space
+# Vectors
+
+### Use `c()` to create a vector
+
+```r
+a &lt;- c("apples", 12, "bananas")
+```
+
+
+### Use `x[index]` to access part of a vector
+
+
+```r
+a[3] # [1] "bananas"
+```
+
+
+### Vectors contain one type of variable
+(Even if you try to make it with more)
+
+```r
+class(a) # [1] "character"
+```
+
+---
+# Data frames (also tibbles)
+
+
+```r
+my_data
+```
+
+```
+##    x   y z
+## 1 s1 101 a
+## 2 s2 102 b
+## 3 s3 103 c
+## 4 s4 104 d
+```
+
+- Columns have different types of variables
+- `x$colname` to pull columns out as vector
+- `x[row, col]` to access rows and columns of a data frame
+
+---
+class: split-40
+# Your Turn: Vectors and Data frames
+
+Try out the following code...
+
+1. What is the output in your console?
+2. How does your `environment` change (upper right panel)?
+
+![:spacer 20px]()
+
+.columnl[
+**Vectors** 
+
+```r
+a &lt;- c("apples", 12, "bananas")
+a
+```
+]
+
+.columnr[
+**Data frames**
+
+```r
+my_data &lt;- data.frame(x = c("s1", "s2", "s3", "s4"),
+                      y = c(101, 102, 103, 104),
+                      z = c("a", "b", "c", "d"))
+my_data
+```
+]
+
+---
+class: split-40
+# Your Turn: Vectors and Data frames
+
+Try out the following code...
+
+.columnl[
+**Vectors** 
+
+```r
+a[2]
+a[2:3]     # What does : do?
+a[c(1, 3)] # What does c() do?
+```
+]
+
+.columnr[
+**Data frames** 
+
+```r
+my_data[3, ]   # Why the comma?
+my_data[3, 1]
+my_data[, 1:2]
+```
+]
+
+
+
+---
+exclude: FALSE
+class: split-40
+# Your Turn: Vectors and Data frames
+
+Try out the following code...
+
+.columnl[
+**Vectors** 
+
+```r
+a[2]
+```
+
+```
+## [1] "12"
+```
+
+```r
+a[2:3]     # What does : do?
+```
+
+```
+## [1] "12"      "bananas"
+```
+
+```r
+a[c(1, 3)] # What does c() do?
+```
+
+```
+## [1] "apples"  "bananas"
+```
+]
+
+.columnr[
+**Data frames** 
+
+```r
+my_data[3, ]   # Why the comma?
+```
+
+```
+##    x   y z
+## 3 s3 103 c
+```
+
+```r
+my_data[3, 1]
+```
+
+```
+## [1] "s3"
+```
+
+```r
+my_data[, 1:2]
+```
+
+```
+##    x   y
+## 1 s1 101
+## 2 s2 102
+## 3 s3 103
+## 4 s4 104
+```
+]
+
+
+---
+class: section
+
+# Miscellaneous
+
+---
+# R has spelling and punctuation
+
+- R cares about spelling
+- R is also case sensitive! (`Apple` is not the same as `apple`)
+- Commas are used to separate arguments in functions
+
+## For example
+
+This is correct:
+
+```r
+mean(c(5, 7, 10))  # [1] 7.333333
+```
+
+This is **not** correct:
+
+```r
+mean(c(5 7 10))
+```
+
+```
+## Error: &lt;text&gt;:1:10: unexpected numeric constant
+## 1: mean(c(5 7
+##              ^
+```
+
+--
+
+.box-r[\&gt;80% of learning R is learning to **troubleshoot**]
+
+---
+class: space
+# R has spelling and punctuation
+
+### Spaces usually don't matter unless they change meanings
+
+
+```r
+5&gt;=6    # [1] FALSE
+5 &gt;=6   # [1] FALSE
+5 &gt;= 6  # [1] FALSE
+5 &gt; = 6 # Error: unexpected '=' in "5 &gt; ="
+```
+
+### Periods don't matter either, but can be used in the same way as letters
+  (But don't)
+
+
+```r
+apple.oranges &lt;- "fruit"
+```
+
+---
+class: space
+# Assignments and Equal signs
+
+### Use `&lt;-` to assign values to objects
+
+
+```r
+a &lt;- "hello"
+```
+
+### Use `=` to set function arguments
+
+
+```r
+mean(x = c(4, 9, 10))
+```
+
+### Use `==` to determine equivalence (logical)
+
+
+```r
+10 == 10 # [1] TRUE
+10 == 9  # [1] FALSE
+```
+
+---
+layout:true
+# Braces/Brackets
+
+---
+
+## Round brackets: `()`
+
+- Identify functions (even if there are no arguments)
+
+
+```r
+Sys.Date() # Get the Current Date
+```
+
+```
+## [1] "2022-01-28"
+```
+
+--
+
+- Without the `()`, R spits out information on the function:
+
+
+```r
+Sys.Date
+```
+
+```
+## function () 
+## as.Date(as.POSIXlt(Sys.time()))
+## &lt;bytecode: 0x5579c5603090&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+--
+
+.box-br[
+`()` must be associated with a **function**  
+.small[(Well, _almost_ always)]
+]
+
+---
+## Square brackets: `[]`
+
+- Extract parts of objects  
+
+
+```r
+LETTERS
+```
+
+```
+##  [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S"
+## [20] "T" "U" "V" "W" "X" "Y" "Z"
+```
+
+```r
+LETTERS[1]
+```
+
+```
+## [1] "A"
+```
+
+```r
+LETTERS[26]
+```
+
+```
+## [1] "Z"
+```
+
+--
+
+.box-br[
+`[]` have to be associated with an **object** that has dimensions  
+.small[(Always)]
+]
+
+---
+layout: false
+# Improving code readability
+
+### Use spaces like you would in sentences:
+
+```r
+a &lt;- mean(c(4, 10, 13))
+```
+
+is easier to read than 
+
+
+```r
+a&lt;-mean(c(4,10,13))
+```
+
+![:spacer 15px]()
+
+(But the same, coding-wise)
+
+---
+# Improving code readability
+
+### Don't be afraid to use line breaks ('Enters') to make the code more readable
+
+![:spacer 20px]()
+
+**Hard to read**
+
+```r
+a &lt;- data.frame(exp = c("A", "B", "A", "B", "A", "B"), sub = c("A1", "A1", "A2", "A2", "A3", "A3"), res = c(10, 12, 45, 12, 12, 13))
+```
+
+**Easier to read**
+
+```r
+a &lt;- data.frame(exp = c("A", "B", "A", "B", "A", "B"), 
+                sub = c("A1", "A1", "A2", "A2", "A3", "A3"), 
+                res = c(10, 12, 45, 12, 12, 13))
+```
+
+![:spacer 15px]()
+
+(But the same, coding-wise)
+
+---
+class: center, nobar
+
+### .large[Let's go!]
+
+![:img center, bottom: 25px, 70%, , ](figures/happy_r.png)
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

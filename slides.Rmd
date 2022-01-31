@@ -77,7 +77,7 @@ if(post) {
   if(after_date){
     
     # PDF
-    after <- list.files(path = file.path(dir, "Handouts"), full.names = TRUE) %>%
+    after <- list.files(path = file.path(dir, "pdf"), full.names = TRUE) %>%
       str_subset("answers") %T>%
       file.copy(f, overwrite = TRUE)
     

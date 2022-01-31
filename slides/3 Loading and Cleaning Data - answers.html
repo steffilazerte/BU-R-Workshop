@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Loading and Cleaning Data in R</title>
+    <meta charset="utf-8" />
+    <script src="3 Loading and Cleaning Data - answers_files/header-attrs-2.11/header-attrs.js"></script>
+    <link rel="stylesheet" href="pres_styles.css" type="text/css" />
+    <link rel="stylesheet" href="global_styles.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: title-slide, nobar
+![:img right: 25px, bottom: 25px, 40%, , ](figures/dataset.png)
+
+
+## Workshop: Dealing with Data in R
+# Loading and &lt;br&gt;Cleaning Data in R
+## I know the file exists, why doesn't R?
+
+
+.footnote[Steffi LaZerte &lt;https://steffilazerte.ca&gt; | *Compiled: 2022-01-26*]
+
+
+
+
+---
+class: section
+
+# First things first
+
+Save previous script
+
+Open New File &lt;br&gt;.medium[(make sure you're in the RStudio Project)]
+
+![:spacer 10px]()
+
+Add `library(tidyverse)` to the top
+
+Save this new script
+
+.medium[consider names like `cleaning.R` or `3_loading_and_cleaning.R`]
+
+
+---
+# R base vs. `tidyverse`
+
+## R base
+- R base is basic R
+- Most packages used are installed and loaded by default
+
+
+--
+
+## `tidyverse`
+- Collection of 'new' packages developed by a team closely affiliated with RStudio
+- Packages designed to work well together
+- Use a slightly different syntax
+- Among others, includes packages used for data transformations and visualizations:
+    - e.g., `ggplot2`, `dplyr`, `tidyr`, `readr`
+
+--
+
+&gt; Can be helpful to understand whether functions are `tidyverse` or R base functions
+
+---
+class: split-50
+# Dealing with data
+
+.columnl[
+## 1. Loading data
+  - Get your data into R
+
+## 2. Looking for problems
+  - Typos
+  - Incorrectly loaded data
+
+## 3. Fixing problems
+  - Corrections
+  - Renaming
+]
+
+.columnr[
+## 4. Setting formats
+  - Dates
+  - Numbers
+  - Factors
+
+## 5. Saving your data
+]
+
+---
+class: section
+
+# 1. Loading Data
+
+---
+class: full-width
+# Data types: What kind of data do you have?
+
+## Specific program files
+
+Type           | Extension         | R Package   | R function
+-------------- | ----------------- | ----------- | ------------
+Excel          | .xls, .xlsx       | `readxl`    | `read_excel()` 
+Open Document  | .ods              | `readODS`   | `read_ods()`
+SPSS           | .sav, .zsav, .por | `haven`     | `read_spss()`
+SAS            | .sas7bdat         | `haven`     | `read_sas()`            
+Stata          | .dta              | `haven`     | `read_dta()`
+Database Files | .dbf              | `foreign`   | `read.dbf()`
+
+
+--
+
+### Convenient but...
+- Can be unreliable
+- Can take longer
+
+![:box 35%, 83%, 50%](For files that don't change, better to save as a &lt;code&gt;*.csv&lt;/code&gt; (Comma-separated-variables file&amp;rpar;)
+
+---
+class: full-width
+# Data types: What kind of data do you have?
+
+## General text files
+
+Type            | R base          | `readr` package (`tidyverse`)
+--------------- | --------------- | --------------
+Comma separated | `read.csv()`    | `read_csv()`, `read_csv2()`
+Tab separated   | `read.delim()`  | `read_tsv()`
+Space separated | `read.table()`  | `read_table()`
+Fixed-width     | `read.fwf()`    | `read_fwf()`
+
+--
+
+- **`readr` package** especially useful for big data sets (fast!)
+- Error/warnings from `readr` are a bit more helpful
+
+--
+
+&gt; We'll focus on: 
+&gt; - `readxl` package - `read_excel()` 
+&gt; - `readr` package - `read_csv()`, `read_tsv()`
+
+---
+# Where is my data?
+
+## Common error
+
+
+```r
+my_data &lt;- read_csv("weather.csv")
+```
+
+```
+## Error: 'weather.csv' does not exist in current working directory ('/home/steffi/Projects/R Workshop/Lessons').
+```
+
+With no folder (just file name) R expects file to be in **Working directory**
+
+--
+
+### Working directory is:
+- Where your RStudio project is
+- Your home directory (My Documents, etc.) [If not using RStudio Projects]
+- Where you've set it (using `setwd()` or RStudio's Session &gt; Set Working Directory)
+
+--
+
+&gt; Using Projects in RStudio is a great idea, try to avoid `setwd()`
+
+---
+# Where is my data?
+
+## A note on file paths (file locations)
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;/&lt;span style="background-color:#ffff7f"&gt;home&lt;/span&gt;&lt;/code&gt;
+
+- folders separated by `/`
+- `home` is a folder
+
+---
+# Where is my data?
+
+## A note on file paths (file locations)
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;/&lt;span style="background-color:#ffff7f"&gt;home&lt;/span&gt;/&lt;span style="background-color:#ffff7f"&gt;steffi&lt;/span&gt;/&lt;/code&gt;
+
+- folders separated by `/`
+- `home` and `steffi` are folders
+- `steffi` is a folder inside of `home`
+
+---
+# Where is my data?
+
+## A note on file paths (file locations)
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;/home/steffi/Documents/R Projects/&lt;span style="background-color:#ffff7f"&gt;mydata.csv&lt;/span&gt;&lt;/code&gt;
+
+- folders separated by `/`
+- `home`, `steffi`, `Documents`, `R Projects` are folders
+- `steffi` is inside of `home`, `Documents` is inside of `steffi`, etc.
+- `mydata.csv` is a data file inside `R Projects` folder
+
+
+![:img center, bottom: 10px, 40%, Screen shot of RStudio file pane showing mydata.csv, , RStudio Files Pane](figures/file_viewer.png)
+
+---
+class: full-width, split-55
+
+# Where is my data?
+
+## A note on file paths (file locations)
+
+.columnl[
+### **Absolute** Paths
+
+.small[
+OS     | Path
+------ | --------
+**LINUX** | /home/steffi/Documents/R Projects/mydata.csv
+ **WINDOWS** | C:/Users/steffi/My Documents/R Projects/mydata.csv
+**MAC** | /users/steffi/Documents/R Projects/mydata.csv
+]
+]
+.columnr[
+![:spacer 50px]()
+
+Full location, folders and filename
+]
+
+---
+class: full-width, split-55
+
+# Where is my data?
+
+## A note on file paths (file locations)
+
+.columnl[
+### **Absolute** Paths
+
+.small[
+OS     | Path
+------ | --------
+**LINUX** | /home/steffi/Documents/R Projects/mydata.csv
+ **WINDOWS** | C:/Users/steffi/My Documents/R Projects/mydata.csv
+**MAC** | /users/steffi/Documents/R Projects/mydata.csv
+]
+
+![:spacer 10px]()
+
+### **Relative** Paths
+.small[
+Path               | Where to look
+------------------ | --------
+mydata.csv         | Here (current directory)
+../mydata.csv      | Go up one directory (../)
+data/mydata.csv    | Stay here, go into "data" folder (data/)
+../data/mydata.csv | Go up one directory (../), then into "data" folder (data/)
+]
+]
+.columnr[
+![:spacer 50px]()
+
+Full location, folders and filename
+
+![:spacer 75px]()
+
+Only include some folders, and filename.  
+Use relative symbols (e.g., `../`)
+]
+
+--
+
+![:box 25%, 20%, 30%](With RStudio 'Projects' only need to use &lt;strong&gt;relative&lt;/strong&gt; paths)
+
+
+---
+class: split-50
+# Keep yourself organized
+
+## For simple projects
+- Create an 'RStudio Project' for each Project (Chapter, Thesis, etc.)
+- Create a specific "Data" folder within each project (one per project)
+
+
+```r
+*- Prospect Lake Quality                 # Project Folder
+    - prospect_analysis.R
+*   - data                              # Data Folder
+        - prospect_data_2017-01-01.csv
+        - prospect_data_2017-02-01.csv
+```
+
+--
+
+- Use **relative** paths to refer to this folder
+
+
+```r
+d &lt;- read_csv("data/prospect_data_2017-01-01.csv")
+```
+
+
+---
+class: section
+
+# Let's Load Some Data!
+
+
+---
+class: space-list, split-60
+# Your turn: Load some data
+
+.columnl[
+1. Create a '**data**' folder in your RStudio project
+
+2. Put [`rivers_correct.xlsx`](https://steffilazerte.ca/BU-R-Workshop/data/rivers_correct.xlsx) file in the
+"**data**" folder
+
+3. Load the package
+  
+  ```r
+  library(readxl)
+  ```
+4. Read in the Excel file and assign to object `rivers`
+  
+  ```r
+  rivers &lt;- read_excel("data/rivers_correct.xlsx")
+  ```
+5. Use `head()` and `tail()` functions to look at the data
+  .small[e.g., `head(rivers)` and `tail(rivers)`]
+
+6. Click on the `rivers` object in your "Environment" pane to look at the whole data set
+]
+
+![:img right: 25px, top: 125px, 37%, , , Click on "New Folder"](figures/files.png)
+
+![:img right: 25px, bottom: 100px, 37%, , , Use the &lt;strong&gt;'tab'&lt;/strong&gt; key in RStudio when typing in the file name for auto-complete](figures/tip_file_nav.gif)
+
+
+---
+exclude: FALSE
+# Your turn: Load some data
+
+.small[
+
+```r
+library(readxl)
+rivers &lt;- read_excel("data/rivers_correct.xlsx")
+```
+
+```r
+head(rivers)
+```
+
+```
+## # A tibble: 6 × 5
+##   `River Name` Site        Ele   Amo                Wea   
+##   &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;              &lt;chr&gt; 
+## 1 Grasse       Up stream   Al    0.605555555555556  sunny 
+## 2 Grasse       Mid stream  Al    0.425              sunny 
+## 3 Grase        Down stream Al    0.194444444444444  cloudy
+## 4 Oswegatchie  Up stream   Al    1                  wet   
+## 5 Oswegatchie  Mid stream  Al    0.161111111111111  snowy 
+## 6 Oswegatchie  Down stream Al    0.0333333333333333 cloudy
+```
+
+```r
+tail(rivers)
+```
+
+```
+## # A tibble: 6 × 5
+##   `River Name` Site        Ele   Amo               Wea   
+##   &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;             &lt;chr&gt; 
+## 1 Raquette     Up stream   Zr    0.333333333333333 cloudy
+## 2 Raquette     Mid stream  Zr    0.111111111111111 cloudy
+## 3 Raquette     Down stream Zr    0                 wet   
+## 4 St. Regis    Up stream   Zr    0.888888888888889 snowy 
+## 5 St. Regis    Mid stream  Zr    0.777777777777778 snowy 
+## 6 St. Regis    Down stream Zr    0.666666666666667 cloudy
+```
+]
+
+![:img right: 25px, top: 100px, 37%, , ](figures/dataset.png)
+
+
+
+---
+class: space-list
+# How do I know which function to use?
+
+### Look at the file extension:
+
+- [`rivers_correct.csv`](https://steffilazerte.ca/BU-R-Workshop/data/rivers_correct.csv)
+
+- `.csv` = Comma-separated-variables = `read_csv()`
+
+--
+
+&gt; But not always obvious...
+
+---
+class: space-list
+# How do I know which function to use?
+
+### Look at the file: [`master_moch.txt`](https://steffilazerte.ca/BU-R-Workshop/data/master_moch.txt)
+    
+- Put this file in your **`data`** folder
+- In lower right-hand pane, click on **Files**
+  - Click on **data** folder
+  - Click on **master_moch.txt**
+  - Click "View File" .small[(if asked)]
+
+```
+ID	region	hab	freq	freq.sd	p.notes
+MCB02	kam	0.5266879074	3.9806600009	3.9806600009	0.4592592593
+MCB03	kam	-0.9707703735	4.1090031783	4.1090031783	0.5
+MCB04	kam	-0.9707703735	4.2463067674	4.2463067674	0.5151515152
+```
+
+![:spacer 5px]()
+
+&gt; This **does not** read the file into R, but only shows you the contents as text.
+
+--
+
+![:box 25%, 30%, 30%](Hmm, not comma-separated, maybe tab-separated?)
+
+---
+# How do I know what to use?
+
+### Peak:
+- Pick a read function with your best guess (`read_csv()` is a good start)
+- Use `n_max` to read only first few rows
+
+
+```r
+read_csv("data/master_moch.txt", n_max = 3)
+```
+
+```
+## # A tibble: 3 × 1
+##   `ID\tregion\thab\tfreq\tfreq.sd\tp.notes`                            
+##   &lt;chr&gt;                                                                
+## 1 "MCB02\tkam\t0.5266879074\t3.9806600009\t3.9806600009\t0.4592592593" 
+## 2 "MCB03\tkam\t-0.9707703735\t4.1090031783\t4.1090031783\t0.5"         
+## 3 "MCB04\tkam\t-0.9707703735\t4.2463067674\t4.2463067674\t0.5151515152"
+```
+
+&gt; `\t` means tab, so this is tab-separated data
+
+---
+# How do I know what to use?
+
+### Peak:
+- Try again with `read_tsv()`
+
+
+
+```r
+read_tsv("data/master_moch.txt", n_max = 3)  # note change in function!
+```
+
+```
+## # A tibble: 3 × 6
+##   ID    region    hab  freq freq.sd p.notes
+##   &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 MCB02 kam     0.527  3.98    3.98   0.459
+## 2 MCB03 kam    -0.971  4.11    4.11   0.5  
+## 3 MCB04 kam    -0.971  4.25    4.25   0.515
+```
+
+.spacer[ ]
+
+&gt; Excellent!
+
+---
+class: section
+
+# Specifics of loading functions
+
+---
+class: space-list, split-50
+# 1. `col_names`
+
+-  [Geolocator data](https://steffilazerte.ca/BU-R-Workshop/data/geolocators.csv)
+
+.columnl[
+.small[
+
+```r
+my_data &lt;- read_csv("data/geolocators.csv")
+my_data
+```
+
+```
+## # A tibble: 20 × 2
+*##    `02/05/11 22:29:59`  `64`
+##    &lt;chr&gt;               &lt;dbl&gt;
+##  1 02/05/11 22:31:59      64
+##  2 02/05/11 22:33:59      38
+##  3 02/05/11 22:35:59      38
+##  4 02/05/11 22:37:59      34
+##  5 02/05/11 22:39:59      30
+##  6 02/05/11 22:41:59      34
+##  7 02/05/11 22:43:59      40
+##  8 02/05/11 22:45:59      46
+##  9 02/05/11 22:47:59      48
+## 10 02/05/11 22:49:59      46
+## # … with 10 more rows
+```
+]
+
+&gt; Oops?
+]
+
+--
+
+.columnr[
+
+- `read_csv`, `read_tsv`, etc. assume that the first row contains the column names
+- This file doesn't have headers
+]
+
+
+---
+class: split-50
+# 1. `col_names`
+
+.columnl[
+
+### Declare no headings
+.small[
+
+```r
+my_data &lt;- read_csv("data/geolocators.csv", 
+*                   col_names = FALSE)
+my_data
+```
+
+```
+## # A tibble: 21 × 2
+*##    X1                   X2
+##    &lt;chr&gt;             &lt;dbl&gt;
+##  1 02/05/11 22:29:59    64
+##  2 02/05/11 22:31:59    64
+##  3 02/05/11 22:33:59    38
+##  4 02/05/11 22:35:59    38
+##  5 02/05/11 22:37:59    34
+##  6 02/05/11 22:39:59    30
+##  7 02/05/11 22:41:59    34
+##  8 02/05/11 22:43:59    40
+##  9 02/05/11 22:45:59    46
+## 10 02/05/11 22:47:59    48
+## # … with 11 more rows
+```
+]
+]
+
+--
+
+.columnr[
+### Name headings
+
+.small[
+
+```r
+my_data &lt;- read_csv("data/geolocators.csv", 
+*                   col_names = c("date", "light"))
+my_data
+```
+
+```
+## # A tibble: 21 × 2
+*##    date              light
+##    &lt;chr&gt;             &lt;dbl&gt;
+##  1 02/05/11 22:29:59    64
+##  2 02/05/11 22:31:59    64
+##  3 02/05/11 22:33:59    38
+##  4 02/05/11 22:35:59    38
+##  5 02/05/11 22:37:59    34
+##  6 02/05/11 22:39:59    30
+##  7 02/05/11 22:41:59    34
+##  8 02/05/11 22:43:59    40
+##  9 02/05/11 22:45:59    46
+## 10 02/05/11 22:47:59    48
+## # … with 11 more rows
+```
+]]
+
+---
+# 2. `skip` info rows before data
+
+- [Grain size data](https://steffilazerte.ca/BU-R-Workshop/data/grain_size.txt)
+
+
+```r
+my_data &lt;- read_tsv("data/grain_size.txt")
+my_data
+```
+
+```
+## # A tibble: 36 × 7
+*##    `DATA DOWNLOAD: 2015-09-23` ...2  ...3        ...4     ...5  ...6  ...7 
+##    &lt;chr&gt;                       &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+*##  1 SYSTEM 001                  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+*##  2 LOGGER X                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+*##  3 lab_num                     CSP   sample_num  depth_lb csa   msa   fsa  
+##  4 3177                        CSP01 CSP01-P-1-1 4        13.04 17.37 8.19 
+##  5 3178                        CSP01 CSP01-P-1-2 12       10.74 16.9  7.92 
+##  6 3179                        CSP01 CSP01-P-1-3 35       12.11 17.75 6.99 
+##  7 3180                        CSP01 CSP01-P-1-4 53       17.61 18.16 6.29 
+##  8 3181                        CSP01 CSP01-P-1-5 83       21.05 18.38 6.26 
+##  9 3182                        CSP01 CSP01-P-1-6 105      19.02 18.43 6.28 
+## 10 3183                        CSP08 CSP08-P-1-1 10       11.6  17.14 8.18 
+## # … with 26 more rows
+```
+
+
+---
+class: split-30
+# 2. `skip` info rows before data
+
+- [Grain size data](https://steffilazerte.ca/BU-R-Workshop/data/grain_size.txt)
+
+
+
+```r
+my_data &lt;- read_tsv("data/grain_size.txt")
+```
+
+![:spacer 25px]() 
+
+.columnl[
+**Look at the file:**
+- Click on **Files** tab
+- Click on **data** folder
+- Click on **grain_size.txt**
+- Click **"View file"** .small[(if asked)]
+]
+
+--
+
+.columnr[
+```
+DATA DOWNLOAD: 2015-09-23						
+SYSTEM 001						
+LOGGER X						
+lab_num	CSP	sample_num	depth_lb	csa	msa	fsa
+3177	CSP01	CSP01-P-1-1	4	13.04	17.37	8.19
+3178	CSP01	CSP01-P-1-2	12	10.74	16.9	7.92
+3179	CSP01	CSP01-P-1-3	35	12.11	17.75	6.99
+3180	CSP01	CSP01-P-1-4	53	17.61	18.16	6.29
+3181	CSP01	CSP01-P-1-5	83	21.05	18.38	6.26
+```
+]
+
+![:box 35%, 80%, 40%](&lt;strong&gt;Ah ha!&lt;/strong&gt;&lt;br&gt;Metadata was stored at the top of the file)
+
+---
+class: split-30
+# 2. `skip` info rows before data
+
+- [Grain size data](https://steffilazerte.ca/BU-R-Workshop/data/grain_size.txt)
+- Add `skip = 3` to skip the first three rows
+
+
+```r
+my_data &lt;- read_tsv("data/grain_size.txt", skip = 3)
+my_data
+```
+
+```
+## # A tibble: 33 × 7
+##    lab_num CSP   sample_num  depth_lb   csa   msa   fsa
+##      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1    3177 CSP01 CSP01-P-1-1        4 13.0  17.4   8.19
+##  2    3178 CSP01 CSP01-P-1-2       12 10.7  16.9   7.92
+##  3    3179 CSP01 CSP01-P-1-3       35 12.1  17.8   6.99
+##  4    3180 CSP01 CSP01-P-1-4       53 17.6  18.2   6.29
+##  5    3181 CSP01 CSP01-P-1-5       83 21.0  18.4   6.26
+##  6    3182 CSP01 CSP01-P-1-6      105 19.0  18.4   6.28
+##  7    3183 CSP08 CSP08-P-1-1       10 11.6  17.1   8.18
+##  8    3184 CSP08 CSP08-P-1-2       27 15.4  16.2   6.76
+##  9    3185 CSP08 CSP08-P-1-3       90 14.9  15.8   7.12
+## 10    3186 CSP02 CSP02-P-1-1        5  8.75  8.64  3.41
+## # … with 23 more rows
+```
+
+![:spacer 15px]()
+
+&gt; Much better!
+
+---
+# Your turn: Load this data set
+
+Try loading the telemetry data set: [`Sta A Data 2006-11-07.dmp`](https://steffilazerte.ca/BU-R-Workshop/data/Sta%20A%20Data%202006-11-07.dmp)
+
+1. Look at the file
+2. Decide which R function to use based on delimiter .small[(comma, space, or tab?)]
+3. Any other options need to be specified?
+
+### It should look like this:
+
+```
+## # A tibble: 19 × 7
+##   StartDate Time     Frequency `Rate/Temp`   Pwr Ant      SD
+##       &lt;dbl&gt; &lt;time&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;
+## 1     39022 17:15:36      150.        34.8   175 M0        0
+## 2     39022 17:19:14      148.        19.2    72 M0        0
+## 3     39022 17:19:25      148.        19.7   194 M1        0
+## 4     39022 17:20:04      149.        33.8   104 M0        0
+## 5     39022 17:20:17      149.        33.7   152 M1        0
+## 6     39022 17:20:57      150.        34.2   188 M0        0
+## 7     39022 17:22:50      148.         9.8   188 M0        0
+## # … with 12 more rows
+```
+
+![:box 15%, 30%, 25%](&lt;strong&gt;Extra Challenge&lt;/strong&gt;&lt;br&gt;Load some of your own tricky data)
+
+
+---
+exclude: FALSE
+# Your turn: Load this data set
+
+Try loading the telemetry data set: [`Sta A Data 2006-11-07.dmp`](https://steffilazerte.ca/BU-R-Workshop/data/Sta%20A%20Data%202006-11-07.dmp)
+
+
+```r
+telemetry &lt;- read_csv("data/Sta A Data 2006-11-07.dmp", skip = 2)
+telemetry
+```
+
+```
+## # A tibble: 19 × 7
+##   StartDate Time     Frequency `Rate/Temp`   Pwr Ant      SD
+##       &lt;dbl&gt; &lt;time&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;
+## 1     39022 17:15:36      150.        34.8   175 M0        0
+## 2     39022 17:19:14      148.        19.2    72 M0        0
+## 3     39022 17:19:25      148.        19.7   194 M1        0
+## 4     39022 17:20:04      149.        33.8   104 M0        0
+## 5     39022 17:20:17      149.        33.7   152 M1        0
+## 6     39022 17:20:57      150.        34.2   188 M0        0
+## 7     39022 17:22:50      148.         9.8   188 M0        0
+## # … with 12 more rows
+```
+
+---
+class: section
+
+# 2. Looking for problems
+
+
+
+---
+# Look at the data
+
+- Make sure columns as expected (correctly assigned file format)
+- Make sure no extra lines above the data (should we have used a skip?)
+- Make sure column names look appropriate
+
+.small[
+
+```r
+library(palmerpenguins)
+penguins
+```
+
+```
+## # A tibble: 344 × 8
+##    species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g sex     year
+##    &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt; &lt;fct&gt;  &lt;int&gt;
+##  1 Adelie  Torgersen           39.1          18.7               181        3750 male    2007
+##  2 Adelie  Torgersen           39.5          17.4               186        3800 female  2007
+##  3 Adelie  Torgersen           40.3          18                 195        3250 female  2007
+##  4 Adelie  Torgersen           NA            NA                  NA          NA &lt;NA&gt;    2007
+##  5 Adelie  Torgersen           36.7          19.3               193        3450 female  2007
+##  6 Adelie  Torgersen           39.3          20.6               190        3650 male    2007
+##  7 Adelie  Torgersen           38.9          17.8               181        3625 female  2007
+##  8 Adelie  Torgersen           39.2          19.6               195        4675 male    2007
+##  9 Adelie  Torgersen           34.1          18.1               193        3475 &lt;NA&gt;    2007
+## 10 Adelie  Torgersen           42            20.2               190        4250 &lt;NA&gt;    2007
+## # … with 334 more rows
+```
+]
+
+---
+# Look at the data
+
+- Did the whole data set load?
+- Are there extra blank lines at the end of the data?
+
+
+```r
+tail(penguins)
+```
+
+```
+## # A tibble: 6 × 8
+##   species   island bill_length_mm bill_depth_mm flipper_length_mm body_mass_g sex     year
+##   &lt;fct&gt;     &lt;fct&gt;           &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt; &lt;fct&gt;  &lt;int&gt;
+## 1 Chinstrap Dream            45.7          17                 195        3650 female  2009
+## 2 Chinstrap Dream            55.8          19.8               207        4000 male    2009
+## 3 Chinstrap Dream            43.5          18.1               202        3400 female  2009
+## 4 Chinstrap Dream            49.6          18.2               193        3775 male    2009
+## 5 Chinstrap Dream            50.8          19                 210        4100 male    2009
+## 6 Chinstrap Dream            50.2          18.7               198        3775 female  2009
+```
+
+
+---
+class: split-50
+# `skim()`
+
+- Are the column formats correct?
+  - i.e., numbers (`numeric`), text (`character`), date (`date`, `POSIXct`, `datetime`), categories (`factor`)
+- Are numeric values appropriate? 
+  - Should there be `NA`s?
+- Are there any typos in categorical columns?
+- Are there as many rows as you expected?
+
+
+.small[
+
+```r
+library(skimr)
+skim(penguins)
+```
+
+```
+## ── Data Summary ────────────────────────
+##                            Values  
+## Name                       penguins
+## Number of rows             344     
+## Number of columns          8       
+## _______________________            
+## Column type frequency:             
+##   factor                   3       
+##   numeric                  5       
+## ________________________           
+## Group variables            None    
+## 
+## ── Variable type: factor ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+##   skim_variable n_missing complete_rate ordered n_unique top_counts                 
+## 1 species               0         1     FALSE          3 Ade: 152, Gen: 124, Chi: 68
+## 2 island                0         1     FALSE          3 Bis: 168, Dre: 124, Tor: 52
+## 3 sex                  11         0.968 FALSE          2 mal: 168, fem: 165         
+## 
+## ── Variable type: numeric ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+##   skim_variable     n_missing complete_rate   mean      sd     p0    p25    p50    p75   p100 hist 
+## 1 bill_length_mm            2         0.994   43.9   5.46    32.1   39.2   44.4   48.5   59.6 ▃▇▇▆▁
+## 2 bill_depth_mm             2         0.994   17.2   1.97    13.1   15.6   17.3   18.7   21.5 ▅▅▇▇▂
+## 3 flipper_length_mm         2         0.994  201.   14.1    172    190    197    213    231   ▂▇▃▅▂
+## 4 body_mass_g               2         0.994 4202.  802.    2700   3550   4050   4750   6300   ▃▇▆▃▂
+## 5 year                      0         1     2008.    0.818 2007   2007   2008   2009   2009   ▇▁▇▁▇
+```
+]
+
+
+
+---
+# `skim()`
+
+.small[
+
+```
+## 
+## ── Variable type: factor ───────────────────────────────────────────────────────────────────────────────────────────────
+##   skim_variable n_missing complete_rate ordered n_unique top_counts                 
+## 1 species               0         1     FALSE          3 Ade: 152, Gen: 124, Chi: 68
+## 2 island                0         1     FALSE          3 Bis: 168, Dre: 124, Tor: 52
+## 3 sex                  11         0.968 FALSE          2 mal: 168, fem: 165         
+## 
+## ── Variable type: numeric ──────────────────────────────────────────────────────────────────────────────────────────────
+##   skim_variable     n_missing complete_rate   mean      sd     p0    p25    p50    p75   p100 hist 
+## 1 bill_length_mm            2         0.994   43.9   5.46    32.1   39.2   44.4   48.5   59.6 ▃▇▇▆▁
+## 2 bill_depth_mm             2         0.994   17.2   1.97    13.1   15.6   17.3   18.7   21.5 ▅▅▇▇▂
+## 3 flipper_length_mm         2         0.994  201.   14.1    172    190    197    213    231   ▂▇▃▅▂
+## 4 body_mass_g               2         0.994 4202.  802.    2700   3550   4050   4750   6300   ▃▇▆▃▂
+## 5 year                      0         1     2008.    0.818 2007   2007   2008   2009   2009   ▇▁▇▁▇
+```
+]
+
+---
+# `count()`
+
+- Check for sample sizes and potential typos in categorical columns
+
+
+```r
+count(penguins, species)
+```
+
+```
+## # A tibble: 3 × 2
+##   species       n
+##   &lt;fct&gt;     &lt;int&gt;
+## 1 Adelie      152
+## 2 Chinstrap    68
+## 3 Gentoo      124
+```
+
+```r
+count(penguins, island)
+```
+
+```
+## # A tibble: 3 × 2
+##   island        n
+##   &lt;fct&gt;     &lt;int&gt;
+## 1 Biscoe      168
+## 2 Dream       124
+## 3 Torgersen    52
+```
+
+
+
+---
+# Example of problematic data
+
+.small[
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers
+```
+
+```
+## # A tibble: 300 × 5
+##    `River Name` Site        Ele   Amo                Wea   
+##    &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;              &lt;chr&gt; 
+##  1 Grasse       Up stream   Al    0.605555555555556  sunny 
+##  2 Grasse       Mid stream  Al    0.425              sunny 
+##  3 Grase        Down stream Al    0.194444444444444  cloudy
+##  4 Oswegatchie  Up stream   Al    1                  wet   
+##  5 Oswegatchie  Mid stream  Al    0.161111111111111  snowy 
+##  6 Oswegatchie  Down stream Al    0.0333333333333333 cloudy
+##  7 Raquette     Up stream   Al    0.291666666666667  cloudy
+##  8 Raquette     Mid stream  Al    0.0388888888888889 cloudy
+##  9 Raquette     Down stream Al    0                  snowy 
+## 10 St. Regis    Up stream   Al    0.680555555555556  wet   
+## # … with 290 more rows
+```
+]
+
+- Column names are not great (`River Name` not R-friendly) or obvious (what is `Ele`?)
+- `Amo` - should be numeric but isn't
+- At least one typo in River (`Grase` should be `Grasse`)
+
+---
+# Example of problematic data
+
+.small[
+
+```r
+skim(rivers)
+```
+]
+
+
+```
+## 
+## ── Variable type: character ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+##   skim_variable n_missing complete_rate   min   max empty n_unique whitespace
+## 1 River Name            0          1        5    11     0        7          0
+## 2 Site                  0          1        9    11     0        3          0
+## 3 Ele                   0          1        1     2     0       25          0
+## 4 Amo                  12          0.96     1    19     0      198          0
+## 5 Wea                   0          1        3     6     0        4          0
+```
+
+- Not much additional info here
+
+---
+class: split-50
+# Example of problematic data
+
+.columnl[
+
+```r
+count(rivers, `River Name`)
+```
+
+```
+## # A tibble: 7 × 2
+##   `River Name`     n
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 Grase            1
+## 2 grasse           1
+## 3 Grasse          73
+## 4 Oswegatchie     75
+## 5 raquette         1
+## 6 Raquette        74
+## 7 St. Regis       75
+```
+]
+
+
+.columnr[
+
+```r
+count(rivers, Site)
+```
+
+```
+## # A tibble: 3 × 2
+##   Site            n
+##   &lt;chr&gt;       &lt;int&gt;
+## 1 Down stream   100
+## 2 Mid stream    100
+## 3 Up stream     100
+```
+]
+
+![:spacer 200px]()
+
+&gt; Typos in both categorical columns
+
+---
+class: section
+# 3. Fixing problems
+
+---
+# Cleaning column names
+
+#### **`clean_names()`**
+
+```r
+library(janitor)
+rivers &lt;- clean_names(rivers)
+rivers
+```
+
+```
+## # A tibble: 300 × 5
+##    river_name  site        ele   amo                wea   
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;              &lt;chr&gt; 
+##  1 Grasse      Up stream   Al    0.605555555555556  sunny 
+##  2 Grasse      Mid stream  Al    0.425              sunny 
+##  3 Grase       Down stream Al    0.194444444444444  cloudy
+##  4 Oswegatchie Up stream   Al    1                  wet   
+##  5 Oswegatchie Mid stream  Al    0.161111111111111  snowy 
+##  6 Oswegatchie Down stream Al    0.0333333333333333 cloudy
+##  7 Raquette    Up stream   Al    0.291666666666667  cloudy
+##  8 Raquette    Mid stream  Al    0.0388888888888889 cloudy
+##  9 Raquette    Down stream Al    0                  snowy 
+## 10 St. Regis   Up stream   Al    0.680555555555556  wet   
+## # … with 290 more rows
+```
+
+---
+# Cleaning column names
+
+### **`rename()`** columns
+
+```r
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers
+```
+
+```
+## # A tibble: 300 × 5
+##    river_name  site        element amount             wea   
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;              &lt;chr&gt; 
+##  1 Grasse      Up stream   Al      0.605555555555556  sunny 
+##  2 Grasse      Mid stream  Al      0.425              sunny 
+##  3 Grase       Down stream Al      0.194444444444444  cloudy
+##  4 Oswegatchie Up stream   Al      1                  wet   
+##  5 Oswegatchie Mid stream  Al      0.161111111111111  snowy 
+##  6 Oswegatchie Down stream Al      0.0333333333333333 cloudy
+##  7 Raquette    Up stream   Al      0.291666666666667  cloudy
+##  8 Raquette    Mid stream  Al      0.0388888888888889 cloudy
+##  9 Raquette    Down stream Al      0                  snowy 
+## 10 St. Regis   Up stream   Al      0.680555555555556  wet   
+## # … with 290 more rows
+```
+
+---
+# Subsetting columns
+
+### **`select()`** columns you do want
+
+```r
+rivers &lt;- select(rivers, river_name, site, element, amount)
+```
+
+--
+
+### **OR**, un**`select()`** columns you don't want
+
+```r
+rivers &lt;- select(rivers, -wea)
+rivers
+```
+
+```
+## # A tibble: 300 × 4
+##    river_name  site        element amount            
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;             
+##  1 Grasse      Up stream   Al      0.605555555555556 
+##  2 Grasse      Mid stream  Al      0.425             
+##  3 Grase       Down stream Al      0.194444444444444 
+##  4 Oswegatchie Up stream   Al      1                 
+##  5 Oswegatchie Mid stream  Al      0.161111111111111 
+##  6 Oswegatchie Down stream Al      0.0333333333333333
+##  7 Raquette    Up stream   Al      0.291666666666667 
+##  8 Raquette    Mid stream  Al      0.0388888888888889
+##  9 Raquette    Down stream Al      0                 
+## 10 St. Regis   Up stream   Al      0.680555555555556 
+## # … with 290 more rows
+```
+
+
+---
+# Cleaning columns
+
+### Put it all together
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers
+```
+
+```
+## # A tibble: 300 × 4
+##    river_name  site        element amount            
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;             
+##  1 Grasse      Up stream   Al      0.605555555555556 
+##  2 Grasse      Mid stream  Al      0.425             
+##  3 Grase       Down stream Al      0.194444444444444 
+##  4 Oswegatchie Up stream   Al      1                 
+##  5 Oswegatchie Mid stream  Al      0.161111111111111 
+##  6 Oswegatchie Down stream Al      0.0333333333333333
+##  7 Raquette    Up stream   Al      0.291666666666667 
+##  8 Raquette    Mid stream  Al      0.0388888888888889
+##  9 Raquette    Down stream Al      0                 
+## 10 St. Regis   Up stream   Al      0.680555555555556 
+## # … with 290 more rows
+```
+
+--
+
+![:box 25%, 25%, 30%](Note repeated data frame &lt;code&gt;rivers&lt;/code&gt;)
+
+---
+class: split-50
+# Fixing typos
+
+.columnl[
+### Look for typos (Visually)
+
+.spacer[ ]
+
+.small[
+
+```r
+ggplot(data = rivers, aes(x = river_name)) + geom_bar()
+ggplot(data = rivers, aes(x = site)) + geom_bar()
+ggplot(data = rivers, aes(x = element)) + geom_bar()
+```
+]
+]
+
+.columnr[ 
+&lt;img src="3 Loading and Cleaning Data - answers_files/figure-html/unnamed-chunk-40-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;img src="3 Loading and Cleaning Data - answers_files/figure-html/unnamed-chunk-41-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: split-50
+# Fixing typos
+
+.columnl[
+### Look for typos with `count()`
+.small[
+
+```r
+count(rivers, river_name)
+```
+
+```
+## # A tibble: 7 × 2
+##   river_name      n
+##   &lt;chr&gt;       &lt;int&gt;
+## 1 Grase           1
+## 2 grasse          1
+## 3 Grasse         73
+## 4 Oswegatchie    75
+## 5 raquette        1
+## 6 Raquette       74
+## 7 St. Regis      75
+```
+]]
+
+.columnr[
+### `filter()` the data to highlight them
+.small[
+
+```r
+filter(rivers, river_name == "Grase")
+```
+
+```
+## # A tibble: 1 × 4
+##   river_name site        element amount           
+##   &lt;chr&gt;      &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;            
+## 1 Grase      Down stream Al      0.194444444444444
+```
+]
+]
+
+---
+# Fixing typos
+
+### Replace typos
+
+Combine the `if_else()` / `case_when()` functions with `mutate()` function
+
+![:spacer 15px]()
+
+**`mutate()`** creates or changes columns in a data frame:
+
+```r
+mutate(dataframe, column = new_values)
+```
+
+**`if_else()`** tests for a condition, and returns one value if FALSE and another if TRUE
+
+```r
+if_else(condition, value_if_true, value_if_false)
+```
+
+**`case_when()`** tests for multiple conditions, and returns different values depending
+
+```r
+case_when(condition1 ~ value_if_true1,
+          condition2 ~ value_if_true2,
+          condition3 ~ value_if_true3,
+          TRUE ~ default_value)
+```
+
+
+---
+# Fixing typos
+
+### Replace typos
+Combine the `if_else` function with the `mutate()` function
+
+
+```r
+rivers &lt;- mutate(rivers, river_name = if_else(river_name == "Grase", "Grasse", river_name))
+```
+
+### Check that it's gone:
+
+```r
+filter(rivers, river_name == "Grase")
+```
+
+```
+## # A tibble: 0 × 4
+## # … with 4 variables: river_name &lt;chr&gt;, site &lt;chr&gt;, element &lt;chr&gt;, amount &lt;chr&gt;
+```
+
+---
+# Iterative process
+
+- Make some corrections
+- Check the data
+- Make some more corrections (either add to or modify existing code)
+
+
+---
+# Your Turn: Fix another one of the "Grasse" typos
+
+1. Check the data with `count()`
+2. Use `mutate()` and `if_else()` to fix the typo
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers &lt;- mutate(rivers, river_name = if_else(river_name == "Grase", "Grasse", river_name))
+
+*rivers &lt;- mutate(???, ??? = ???)
+```
+
+![:box 15%, 20%, 25%](&lt;strong&gt;Extra Challenge&lt;/strong&gt;&lt;br&gt;Examine and fix problems in your own data)
+
+
+---
+exclude: FALSE
+# Your Turn: Fix another "Grasse" typo
+
+1. Check the data with `count()`
+2. Use `mutate()` and `if_else()` to fix the typo
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers &lt;- mutate(rivers, river_name = if_else(river_name == "Grase", "Grasse", river_name))
+
+*rivers &lt;- mutate(rivers, river_name = if_else(river_name == "grasse", "Grasse", river_name))
+```
+
+---
+# Fixing typos
+
+### To be more efficient, fix all typos at once
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers &lt;- mutate(rivers, 
+*                river_name = if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+
+
+![:box 50%, 65%, 40%](&lt;code&gt;==&lt;/code&gt; compares one item to one other&lt;br&gt;&lt;br&gt;&lt;code&gt;%in%&lt;/code&gt; compares one item to many different ones&lt;/small&gt;)
+
+
+---
+# Tangent: `tidyverse` functions
+
+## `rename()`, `select()`, `mutate()`
+- `tidyverse` functions always start with the **&lt;span style="color:#440154"&gt;data&lt;/span&gt;**, followed by other arguments
+- you can reference any **&lt;span style="color:deeppink"&gt;column&lt;/span&gt;** from '**&lt;span style="color:#440154"&gt;data&lt;/span&gt;**'
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;rivers &lt;- read_csv("data/rivers_correct.csv")&lt;br&gt;rivers &lt;- clean_names(&lt;span style="color:#440154"&gt;rivers&lt;/span&gt;)&lt;br&gt;rivers &lt;- rename(&lt;span style="color:#440154"&gt;rivers&lt;/span&gt;, &lt;span style="color:deeppink"&gt;element&lt;/span&gt; = &lt;span style="color:deeppink"&gt;ele&lt;/span&gt;, &lt;span style="color:deeppink"&gt;amo&lt;/span&gt;unt = &lt;span style="color:deeppink"&gt;amo&lt;/span&gt;)&lt;br&gt;rivers &lt;- select(&lt;span style="color:#440154"&gt;rivers&lt;/span&gt;, -&lt;span style="color:deeppink"&gt;wea&lt;/span&gt;)&lt;br&gt;rivers &lt;- mutate(&lt;span style="color:#440154"&gt;rivers&lt;/span&gt;, &lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;if_else(&lt;span style="color:deeppink"&gt;river_name&lt;/span&gt; %in% c("Grase", "grasse"), "Grasse", &lt;span style="color:deeppink"&gt;river_name&lt;/span&gt;))&lt;/code&gt;
+
+- `rename()` changes column names
+- `select()` chooses columns to keep or to remove (with `-`)
+- `mutate()` changes column contents
+
+
+---
+# Tangent: Why use `tidyverse` functions?
+
+### Pipes! `%&gt;%` Allow you to string commands together
+
+![:spacer 5px]()
+
+Instead of:
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers &lt;- mutate(rivers, 
+                 if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+
+--
+
+We have:
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+  mutate(river_name = if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+---
+# Play around
+
+Take a moment to play with this code in your console
+
+### Convert this:
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv")
+rivers &lt;- clean_names(rivers)
+rivers &lt;- rename(rivers, element = ele, amount = amo)
+rivers &lt;- select(rivers, -wea)
+rivers &lt;- mutate(rivers, 
+                 river_name = if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+
+### To this:
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+  mutate(river_name = if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+
+---
+class: split-50
+# Your turn: Fix the remaining typo
+
+- Remember this is an iterative process (you may find your self reloading the data often)
+- Find the typo .small[(expect `river_name`: **Grasse**, **Oswegatchie**, **Raquette**, **St.Regis**)]
+- Add fix to code:
+
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+  mutate(river_name = if_else(river_name %in% c("Grase", "grasse"), "Grasse", river_name))
+```
+
+
+
+
+![:spacer 15px]()
+
+## Remember...
+
+.columnl[
+### Comparing single items
+
+```r
+A == "hello"
+A %in% "hello"
+```
+]
+
+.columnr[
+### Comparing multiple items
+
+```r
+A %in% c("hello", "bye"))
+# NOT A == c("hello", "bye")
+```
+]
+
+![:box 15%, 30%, 25%](&lt;strong&gt;Extra Challenge&lt;/strong&gt;&lt;br&gt;Examine and fix problems in your own data)
+
+
+
+---
+exclude: FALSE
+
+# Your turn: Fix the remaining typos
+
+- Remember this is an iterative process (you may find your self reloading the data often)
+- Don't worry about numerical problems for now
+
+### All typos fixed
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+  mutate(river_name = if_else(river_name %in% c("Grase","grasse"), "Grasse", river_name),
+         river_name = if_else(river_name == "raquette", "Raquette", river_name))
+```
+
+--
+
+&gt; Let's combine these with `case_when()`...
+
+---
+exclude: FALSE
+
+# Your turn: Fix the remaining typos
+
+- Remember this is an iterative process (you may find your self reloading the data often)
+- Don't worry about numerical problems for now
+
+### All typos fixed
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+* mutate(river_name = case_when(river_name %in% c("Grase", "grasse") ~ "Grasse",
+*                               river_name == "raquette" ~ "Raquette",
+*                               TRUE ~ river_name))
+```
+
+---
+class: section
+# 4. Fixing formats
+
+
+---
+# Typos that affect classes (formats)
+
+### Look for problems
+
+.small[
+
+```r
+rivers
+```
+
+```
+## # A tibble: 300 × 4
+##    river_name  site        element amount            
+*##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;             
+##  1 Grasse      Up stream   Al      0.605555555555556 
+##  2 Grasse      Mid stream  Al      0.425             
+##  3 Grasse      Down stream Al      0.194444444444444 
+##  4 Oswegatchie Up stream   Al      1                 
+##  5 Oswegatchie Mid stream  Al      0.161111111111111 
+##  6 Oswegatchie Down stream Al      0.0333333333333333
+##  7 Raquette    Up stream   Al      0.291666666666667 
+##  8 Raquette    Mid stream  Al      0.0388888888888889
+##  9 Raquette    Down stream Al      0                 
+## 10 St. Regis   Up stream   Al      0.680555555555556 
+## # … with 290 more rows
+```
+]
+
+![:box 25%, 50%, 25%](Why all character (chr&amp;rpar;?)
+
+---
+class: split-40, full-width
+# Changing classes
+
+.compact[
+.medium[
+Function  |  Input | Output
+--------- | -------------- | ------
+`as.character()` |  Any vector | Text (Characters)
+`as.numeric()`   |  Any vector (but returns NAs if not numbers) | Numbers
+`as.logical()`   |  TRUE, FALSE, T, F, 0 (FALSE), any other number (all TRUE) | TRUE or FALSE
+`as.factor()`    |  Any vector | Categories
+]]
+
+--
+
+### For example...
+.columnl[.small[
+
+```r
+a &lt;- c(1, 2, 10)
+
+as.character(a)
+```
+
+```
+## [1] "1"  "2"  "10"
+```
+
+```r
+as.numeric(a)
+```
+
+```
+## [1]  1  2 10
+```
+]]
+
+.columnr[
+.small[
+
+```r
+b &lt;- c("hello", "bye", 1)
+as.character(b)
+```
+
+```
+## [1] "hello" "bye"   "1"
+```
+
+```r
+as.numeric(b)
+```
+
+```
+## Warning: NAs introduced by coercion
+```
+
+```
+## [1] NA NA  1
+```
+]]
+
+![:spacer 120px]()
+
+&gt; We'll deal with dates and times later...
+
+
+---
+# Fixing numerical typos
+
+### Find the problem (when we don't know what they are)
+- Make a new column and convert `amount` to numbers
+
+
+```r
+rivers &lt;- mutate(rivers, amount2 = as.numeric(amount))
+```
+
+```
+## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
+```
+
+&gt; `NAs introduced by coercion` means the function was forced to create `NA`s.  
+&gt; This warning tells us that some values didn't convert to numbers
+
+---
+# Fixing numerical typos
+
+### Find the problem (when we don't know what it is)
+- Make a new column and convert `amount` to numbers
+- Find out where the conversion didn't work
+
+
+```r
+filter(rivers, !is.na(amount), is.na(amount2))
+```
+
+```
+## # A tibble: 1 × 5
+##   river_name site       element amount amount2
+##   &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;    &lt;dbl&gt;
+*## 1 Raquette   Mid stream Ca      &lt;0.1        NA
+```
+
+![:spacer 10px]()
+.medium[
+&gt; - `is.na()` is `TRUE` when the value is missing (`NA`)
+&gt; - `!` turns a `TRUE` into a `FALSE` (and vice versa)
+&gt; - This asks, which values are not missing to begin with (`!is.na(amount)`)
+&gt;  but *are* missing after the conversion (`is.na(amount2)`)
+]
+---
+# Fixing numerical typos
+
+### Find the problem (when we know what it is):
+
+```r
+filter(rivers, amount == "&lt;0.1")
+```
+
+```
+## # A tibble: 1 × 5
+##   river_name site       element amount amount2
+##   &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;    &lt;dbl&gt;
+## 1 Raquette   Mid stream Ca      &lt;0.1        NA
+```
+
+--
+
+### Fix problem
+
+```r
+rivers &lt;- mutate(rivers, amount = if_else(amount == "&lt;0.1", "0", amount))
+```
+
+--
+
+### Correct the class
+
+```r
+rivers &lt;- mutate(rivers, amount = as.numeric(amount))
+```
+
+
+---
+# Fixing numerical typos
+
+### Last, but not least, check...
+
+
+```r
+rivers
+```
+
+```
+## # A tibble: 300 × 5
+##    river_name  site        element amount amount2
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Grasse      Up stream   Al      0.606   0.606 
+##  2 Grasse      Mid stream  Al      0.425   0.425 
+##  3 Grasse      Down stream Al      0.194   0.194 
+##  4 Oswegatchie Up stream   Al      1       1     
+##  5 Oswegatchie Mid stream  Al      0.161   0.161 
+##  6 Oswegatchie Down stream Al      0.0333  0.0333
+##  7 Raquette    Up stream   Al      0.292   0.292 
+##  8 Raquette    Mid stream  Al      0.0389  0.0389
+##  9 Raquette    Down stream Al      0       0     
+## 10 St. Regis   Up stream   Al      0.681   0.681 
+## # … with 290 more rows
+```
+
+---
+# Put it together...
+
+
+```r
+rivers &lt;- read_csv("data/rivers_correct.csv") %&gt;%
+  clean_names() %&gt;%
+  rename(element = ele, amount = amo) %&gt;%
+  select(-wea) %&gt;%
+  mutate(river_name = case_when(river_name %in% c("Grase", "grasse") ~ "Grasse",
+                                river_name == "raquette" ~ "Raquette",
+                                TRUE ~ river_name),
+         amount = if_else(amount == "&lt;0.1", "0", amount),
+         amount = as.numeric(amount))
+```
+
+.medium[
+### And you have a clean, corrected data frame ready to use
+- You have not changed the original data
+- You have a **reproducible** record of all corrections
+- You can alter these corrections at any time
+- You have formatted your data for use in R
+]
+---
+class: section
+
+# Dates and Times
+
+## (Or why does R hate me?)
+
+---
+# Dates and Times
+
+- Date/times aren't always recognized as date/times
+
+
+```r
+geolocators &lt;- read_csv("data/geolocators.csv", col_names = c("time", "light"))
+geolocators
+```
+
+```
+## # A tibble: 21 × 2
+##   time              light
+##   &lt;chr&gt;             &lt;dbl&gt;
+## 1 02/05/11 22:29:59    64
+## 2 02/05/11 22:31:59    64
+## 3 02/05/11 22:33:59    38
+## 4 02/05/11 22:35:59    38
+## 5 02/05/11 22:37:59    34
+## 6 02/05/11 22:39:59    30
+## # … with 15 more rows
+```
+
+&gt; Here `time` column is considered `chr` (character/text)
+
+---
+class: nobar
+
+![:img center,  bottom: 0, 78%, ,](https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/lubridate_ymd.png)
+
+.footnote[Artwork by [@allison_horst](https://github.com/allisonhorst/stats-illustrations)]
+
+---
+# `lubridate` package
+
+- Part of `tidyverse`, but needs to be loaded separately
+- Great for converting date/time formats
+
+
+```r
+library(lubridate)
+geolocators &lt;- mutate(geolocators, time_formatted = dmy_hms(time))
+geolocators
+```
+
+```
+## # A tibble: 21 × 3
+##   time              light time_formatted     
+##   &lt;chr&gt;             &lt;dbl&gt; &lt;dttm&gt;             
+## 1 02/05/11 22:29:59    64 2011-05-02 22:29:59
+## 2 02/05/11 22:31:59    64 2011-05-02 22:31:59
+## 3 02/05/11 22:33:59    38 2011-05-02 22:33:59
+## 4 02/05/11 22:35:59    38 2011-05-02 22:35:59
+## 5 02/05/11 22:37:59    34 2011-05-02 22:37:59
+## 6 02/05/11 22:39:59    30 2011-05-02 22:39:59
+## # … with 15 more rows
+```
+
+
+---
+# `lubridate` package
+
+Generally, only the order of the **y**ear, **m**onth, **d**ay, **h**our, **m**inute, or **s**econd matters.
+
+![:spacer 10px]()
+
+
+date/time              | function    | class
+---------------------- | ----------- | -------
+2018-01-01 13:09:11    | `ymd_hms()` | dttm (POSIXct/POSIXt)
+12/20/2019 10:00 PM    | `mdy_hm()` | dttm (POSIXct/POSIXt)
+31/01/2000 10 AM       | `dmy_h()` | dttm (POSIXct/POSIXt)
+31-01/2000             | `dmy()` | Date
+
+![:spacer 25px]()
+
+&gt; `lubridate` is smart enough to detect AMs and PMs
+
+.footnote[**Note:** R *generally* requires that times have dates (`datetime`/`POSIXct`), 
+but dates don't have to have times (`Date`)]
+
+---
+class: section
+
+# 5. Saving data
+
+---
+# Saving data
+
+## Keep yourself organized
+- Keep your R-created data in a **different** folder from your 'raw' data &lt;sup&gt;*&lt;/sup&gt;
+- If you have a lot going on, split your work into several scripts, and number the both the scripts AND the data sets produced:
+ - `1_cleaned.csv`
+ - `2_summarized.csv`
+ - `3_graphing.csv`
+
+--
+
+#### Save your data to file:
+
+```r
+write_csv(rivers, "datasets/rivers_cleaned.csv")
+```
+
+.footnote[&lt;sup&gt;*&lt;/sup&gt; I usually have a `data` folder and then both `raw` and `datasets` folders inside of that]
+
+---
+class: split-50
+# Dealing with data
+
+.columnl[
+## 1. Loading data
+  - Get your data into R
+
+## 2. Looking for problems
+  - Typos
+  - Incorrectly loaded data
+
+## 3. Fixing problems
+  - Corrections
+  - Renaming
+]
+
+.columnr[
+## 4. Setting formats
+  - Dates
+  - Numbers
+  - Factors
+
+## 5. Saving your data
+]
+
+
+---
+# Wrapping up: Common mistakes
+
+### Assuming your data is in one format when it's not
+- Print your data to the console and use `skim()` to explore the format of your data
+- Use `skim()`, `count()`, `filter()`, `select()`, `ggplot()` to explore the content of your data
+
+---
+# Wrapping up: Common mistakes
+### Confusing pipes with function arguments
+- Pipes (`%&gt;%`) pass the _output_ from one function as _input_ to the next function:
+
+
+```r
+my_data &lt;- my_data %&gt;%                 # Pass my_data
+  filter(my_column &gt; 5) %&gt;%            # Pass my_data, filtered
+  select(my_column, my_second_column)
+```
+
+![:spacer 15px]()
+
+- Arguments may be on different lines, but all part of _one_ function
+
+```r
+my_data &lt;- my_data %&gt;%                 # Pass my_data
+  mutate(my_column1 = replace(...),    # No passing (no pipes!)
+         my_column2 = replace(...),    # Instead, give 3 arguments to mutate:
+         my_column3 = replace(...))    # Arguments separated by ",", and surrounded by ( )
+```
+
+
+
+
+---
+# Wrapping up: Further reading
+
+- R for Data Science
+  - [Chapter 5: Transforming data](http://r4ds.had.co.nz/transform.html)
+  - [Chapter 8: RStudio Projects](http://r4ds.had.co.nz/workflow-projects.html)
+  - [Chapter 14: Strings](http://r4ds.had.co.nz/strings.html)
+  - [Chapter 15: Factors](http://r4ds.had.co.nz/factors.html)
+  - [Chapter 18: Pipes](http://r4ds.had.co.nz/pipes.html)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
